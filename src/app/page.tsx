@@ -1,3 +1,4 @@
+"use client";
 import Navbar from "@/components/navbar";
 import SearchBar from "@/components/search-bar";
 import EventBanner from "@/components/event-banner";
