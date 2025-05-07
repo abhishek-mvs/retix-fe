@@ -75,6 +75,13 @@ export function useListTicket() {
       const contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
 
       try {
+        console.log("eventDetails", eventDetails);
+        console.log("eventName", eventName);
+        console.log("eventDate", eventDate);
+        console.log("eventLocation", eventLocation);
+        console.log("ticketImage", ticketImage);
+        console.log("sellerFID", sellerFID);
+        console.log("minBid", minBid);
         await contract.listTicket.staticCall(
           eventDetails,
           eventName,

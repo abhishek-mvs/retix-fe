@@ -1,4 +1,4 @@
-export const CONTRACT_ADDRESS = "0x6425f776313543671b2495ff77cac08b92d69aae";
+export const CONTRACT_ADDRESS = "0xd3e7f0cf9bc1f6ecdc9d887765bf9cae20aea106";
 
 export const RECLAIM_APP_ID = process.env.NEXT_PUBLIC_RECLAIM_APP_ID as string;
 

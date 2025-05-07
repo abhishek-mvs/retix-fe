@@ -49,10 +49,12 @@ export default function SellPage() {
     const actualEventTimestamp = Math.floor(
       new Date(year, month - 1, day, hours, minutes).getTime() / 1000
     );
-
+    console.log("actualEventTimestamp", actualEventTimestamp);
     // Subtract time from actual event for expiry values
     const bidExpiry = actualEventTimestamp - 2 * 86400; // 2 days before event
     const sellerExpiryTime = actualEventTimestamp - 1 * 86400; // 1 day before event
+    console.log("bidExpiry", bidExpiry);
+    console.log("sellerExpiryTime", sellerExpiryTime);
 
     await listTicket({
       eventDetails,
