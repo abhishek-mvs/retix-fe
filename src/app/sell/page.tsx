@@ -96,7 +96,7 @@ export default function SellPage() {
         date.setMinutes(date.getMinutes() - 30);
         
         const timestamp = Math.floor(date.getTime() / 1000);
-        setActualEventTimestamp(timestamp);
+        setActualEventTimestamp(1747765800);
         console.log('actualEventTimestamp', timestamp);
       }
     } catch (error) {
@@ -155,45 +155,7 @@ export default function SellPage() {
                     <h2 className="text-xl font-semibold mb-4">Ticket Details</h2>
 
                     <div className="space-y-4">
-                      {/* <div>
-                        <label
-                          htmlFor="ticket-type"
-                          className="block text-sm font-medium text-gray-700 mb-1"
-                        >
-                          Ticket Type
-                        </label>
-                        <Select>
-                          <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Select ticket type" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="general">
-                              General Admission
-                            </SelectItem>
-                            <SelectItem value="vip">VIP</SelectItem>
-                            <SelectItem value="reserved">
-                              Reserved Seating
-                            </SelectItem>
-                            <SelectItem value="box">Box Seats</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div> */}
-
                       <div className="grid grid-cols-2 gap-4">
-                        {/* <div>
-                          <label
-                            htmlFor="quantity"
-                            className="block text-sm font-medium text-gray-700 mb-1"
-                          >
-                            Quantity
-                          </label>
-                          <Input
-                            id="quantity"
-                            type="number"
-                            min="1"
-                            placeholder="Number of tickets"
-                          />
-                        </div> */}
                         <div>
                           <label
                             htmlFor="price"
@@ -244,36 +206,6 @@ export default function SellPage() {
                           onChange={(e) => setTicketImage(e.target.value)}
                         />
                       </div>
-                      {/* 
-                      <div>
-                        <label
-                          htmlFor="ticket-upload"
-                          className="block text-sm font-medium text-gray-700 mb-1"
-                        >
-                          Upload Ticket Images
-                        </label>
-                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-                          <Upload className="mx-auto h-12 w-12 text-gray-400" />
-                          <p className="mt-2 text-sm text-gray-600">
-                            Drag and drop files here, or click to browse
-                          </p>
-                          <input
-                            id="ticket-upload"
-                            type="file"
-                            multiple
-                            className="hidden"
-                          />
-                          <Button
-                            variant="outline"
-                            className="mt-4"
-                            onClick={() =>
-                              document.getElementById("ticket-upload")?.click()
-                            }
-                          >
-                            Select Files
-                          </Button>
-                        </div>
-                      </div> */}
                     </div>
                   </div>
                 </div>

@@ -1,3 +1,5 @@
+import { ethers } from "ethers";
+
 export function formatTimestamp(timestamp: number | bigint): string {
   const ts = typeof timestamp === "bigint" ? Number(timestamp) : timestamp;
   const date = new Date(ts * 1000); // UNIX timestamp is in seconds
@@ -38,5 +40,5 @@ export const getIPFSUrl = (ipfsUrl: string) => {
 
 export function formatUSDC(amount: bigint): number {
   // Convert from 6 decimals to USDC
-  return Number(amount) / 1_000_000;
+  return Number(ethers.formatEther(amount));
 }

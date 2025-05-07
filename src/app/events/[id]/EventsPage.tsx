@@ -8,10 +8,13 @@ import { useTicketById } from "@/calls/get-ticket";
 import { formatTimestamp, formatTimeLeft, formatUSDC } from "@/utils/formatters";
 import { useState } from "react";
 import BidPopup from "@/components/bid-popup";
+import { useAddUserBid } from "@/calls/add-user-bid";
+import { toast } from "sonner";
 
 export default function EventPage({ id }: { id: number }) {
   const { ticket } = useTicketById(id);
   const [isBidPopupOpen, setIsBidPopupOpen] = useState(false);
+  const { placeBid, loading, error } = useAddUserBid();
 
   const handleOpenBidPopup = () => {
     setIsBidPopupOpen(true);
@@ -21,11 +24,16 @@ export default function EventPage({ id }: { id: number }) {
     setIsBidPopupOpen(false);
   };
 
-  const handleSubmitBid = (amount: number) => {
-    // In a real app, you would submit the bid to your backend
-    console.log(`Bid submitted: $${amount.toFixed(2)}`);
-    // You could show a success message or redirect
+  const handleSubmitBid = async (amount: number) => {
+    try {
+      await placeBid(id, amount);
+      toast.success("Bid placed successfully!");
+      handleCloseBidPopup();
+    } catch (err) {
+      toast.error(error || "Failed to place bid");
+    }
   };
+
   if (!ticket) return <p>Loading...</p>;
 
   // Check if bidding is expired
@@ -112,8 +120,7 @@ export default function EventPage({ id }: { id: number }) {
           eventName={ticket.eventName}
           eventDate={formatTimestamp(ticket.bidExpiryTime)}
           eventLocation={ticket.eventLocation}
-          currentPrice={formatUSDC(ticket.minBid).toString()}
-          minBidIncrement={formatUSDC(ticket.minBid).toString()}
+          minBid={formatUSDC(ticket.minBid).toString()}
           onSubmitBid={handleSubmitBid}
         />
       </div>

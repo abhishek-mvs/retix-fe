@@ -24,8 +24,7 @@ interface BidPopupProps {
   eventName: string
   eventDate: string
   eventLocation: string
-  currentPrice: string
-  minBidIncrement: string
+  minBid: string
   onSubmitBid: (amount: number) => void
 }
 
@@ -35,16 +34,13 @@ export default function BidPopup({
   eventName,
   eventDate,
   eventLocation,
-  currentPrice,
-  minBidIncrement,
+  minBid,
   onSubmitBid,
 }: BidPopupProps) {
   const [bidAmount, setBidAmount] = useState("")
   const [error, setError] = useState<string | null>(null)
 
-  const currentPriceValue = Number.parseFloat(currentPrice.replace(/[^0-9.]/g, ""))
-  const minBidValue = Number.parseFloat(minBidIncrement.replace(/[^0-9.]/g, ""))
-  const minAllowedBid = currentPriceValue + minBidValue
+  const minBidValue = minBid ? Number.parseFloat(minBid.replace(/[^0-9.]/g, "")) : 0
 
   const handleBidChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setBidAmount(e.target.value)
@@ -59,10 +55,10 @@ export default function BidPopup({
       return
     }
 
-    if (amount < minAllowedBid) {
-      setError(`Bid must be at least $${minAllowedBid.toFixed(2)}`)
-      return
-    }
+    // if (amount < minBidValue) {
+    //   setError(`Bid must be at least $${minBidValue.toFixed(2)}`)
+    //   return
+    // }
 
     onSubmitBid(amount)
     setBidAmount("")
@@ -75,7 +71,7 @@ export default function BidPopup({
         <DialogHeader>
           <DialogTitle>Place a Bid</DialogTitle>
           <DialogDescription>
-            Enter your bid amount for this ticket. The minimum bid increment is {minBidIncrement}.
+            Enter your bid amount for this ticket. The minimum bid is {minBid}.
           </DialogDescription>
         </DialogHeader>
 
@@ -88,23 +84,13 @@ export default function BidPopup({
 
           <Separator />
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="current-price" className="text-sm text-gray-500">
-                Current Price
-              </Label>
-              <p id="current-price" className="font-semibold">
-                {currentPrice}
-              </p>
-            </div>
-            <div>
-              <Label htmlFor="min-increment" className="text-sm text-gray-500">
-                Min. Increment
-              </Label>
-              <p id="min-increment" className="font-semibold">
-                {minBidIncrement}
-              </p>
-            </div>
+          <div>
+            <Label htmlFor="min-bid" className="text-sm text-gray-500">
+              Minimum Bid Required
+            </Label>
+            <p id="min-bid" className="font-semibold">
+              {minBid}
+            </p>
           </div>
 
           <div className="space-y-2">
@@ -115,8 +101,8 @@ export default function BidPopup({
                 id="bid-amount"
                 type="number"
                 step="0.01"
-                min={minAllowedBid}
-                placeholder={minAllowedBid.toFixed(2)}
+                min={minBidValue}
+                placeholder={minBidValue.toFixed(2)}
                 className="pl-8"
                 value={bidAmount}
                 onChange={handleBidChange}

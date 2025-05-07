@@ -1,5 +1,7 @@
-// export const CONTRACT_ADDRESS = "0xd3e7f0cf9bc1f6ecdc9d887765bf9cae20aea106";
-export const CONTRACT_ADDRESS = "0xe7f1725e7734ce288f8367e1bb143e90bb3f0512";
+export const CONTRACT_ADDRESS = "0xbb64258850eb438ad515326a40628704b299d57a";
+// export const CONTRACT_ADDRESS = "0xe7f1725e7734ce288f8367e1bb143e90bb3f0512";
+// export const MOCK_USDC_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+export const MOCK_USDC_ADDRESS = "0x2fd2a828992ac642a536bee59ac66d6cd156efd3";
 
 export const RECLAIM_APP_ID = process.env.NEXT_PUBLIC_RECLAIM_APP_ID as string;
 
