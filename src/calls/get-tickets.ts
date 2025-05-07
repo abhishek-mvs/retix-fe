@@ -21,7 +21,7 @@ export const useTickets = () => {
       const contract = new Contract(CONTRACT_ADDRESS, ABI, signer);
 
       const allTickets: Ticket[] = await contract.getAllTickets();
-      console.log("allTickets", allTickets);
+      console.log("allTickets", JSON.stringify(allTickets));
       setTickets(allTickets);
     } catch (err) {
       console.error(err);

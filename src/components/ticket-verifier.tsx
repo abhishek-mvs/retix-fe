@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import QRCode from "react-qr-code";
 import { ReclaimProofRequest } from "@reclaimprotocol/js-sdk";
 import {
@@ -7,16 +7,18 @@ import {
   RECLAIM_APP_SECRET,
 } from "@/data/constants";
 
-function TicketVerfierQR({ onVerified }: { onVerified?: (proof: any) => void }) {
+interface Proof {
+  claimData: {
+    context: string;
+  };
+}
+
+function TicketVerfierQR({ onVerified }: { onVerified?: (proof: Proof) => void }) {
   // State to store the verification request URL
   const [requestUrl, setRequestUrl] = useState("");
   const [proofs, setProofs] = useState<string[]>([]);
 
-  useEffect(() => {
-    getVerificationReq();
-  }, []);
-
-  const getVerificationReq = async () => {
+  const getVerificationReq = useCallback(async () => {
     // Initialize the Reclaim SDK with your credentials
     const reclaimProofRequest = await ReclaimProofRequest.init(
       RECLAIM_APP_ID,
@@ -38,7 +40,7 @@ function TicketVerfierQR({ onVerified }: { onVerified?: (proof: any) => void }) 
             // When using a custom callback url, the proof is returned to the callback url and we get a message instead of a proof
             console.log("SDK Message:", proofs);
             setProofs([proofs]);
-            if (onVerified) onVerified(proofs);
+            if (onVerified) onVerified({ claimData: { context: proofs } });
           } else if (typeof proofs !== "string") {
             // When using the default callback url, we get a proof object in the response
             if (Array.isArray(proofs)) {
@@ -47,32 +49,25 @@ function TicketVerfierQR({ onVerified }: { onVerified?: (proof: any) => void }) 
                 "Verification success",
                 JSON.stringify(proofs.map((p) => p.claimData.context))
               );
-              // setProofs(proofs);
-              if (onVerified) onVerified(proofs);
+              if (onVerified) onVerified(proofs[0]);
             } else {
               // when using provider with a single proof, we get a single proof object
               console.log("Verification success", proofs?.claimData.context);
-              // setProofs(proofs);
-              if (onVerified) onVerified(proofs);
+              if (onVerified) onVerified(proofs as Proof);
             }
           }
         }
-        // Add your success logic here, such as:
-        // - Updating UI to show verification success
-        // - Storing verification status
-        // - Redirecting to another page
       },
       // Called if there's an error during verification
       onError: (error) => {
         console.error("Verification failed", error);
-
-        // Add your error handling logic here, such as:
-        // - Showing error message to user
-        // - Resetting verification state
-        // - Offering retry options
       },
     });
-  };
+  }, [onVerified]);
+
+  useEffect(() => {
+    getVerificationReq();
+  }, [getVerificationReq]);
 
   return (
     <>

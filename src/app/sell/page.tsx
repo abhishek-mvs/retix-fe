@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import Navbar from "@/components/navbar";
-import { ArrowLeft, Calendar, MapPin, Tag, Info } from "lucide-react";
+import { ArrowLeft, Tag, Info } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,6 +16,12 @@ import TicketVerfierQR from "@/components/ticket-verifier";
 //   SelectValue,
 // } from "@/components/ui/select";
 
+interface Proof {
+  claimData: {
+    context: string;
+  };
+}
+
 export default function SellPage() {
   const {
     listTicket,
@@ -29,7 +35,7 @@ export default function SellPage() {
   const [eventDetails, setEventDetails] = useState("");
   const [finalEstimate, setFinalEstimate] = useState<number | null>(null);
   const [isVerified, setIsVerified] = useState(false);
-  const [proof, setProof] = useState<any>(null);
+  const [proof, setProof] = useState<Proof | null>(null);
   const [actualEventTimestamp, setActualEventTimestamp] = useState<number | null>(null);
 
   useEffect(() => {
@@ -46,14 +52,8 @@ export default function SellPage() {
 
   const handleList = async () => {
     console.log(eventDate);
-    if (!eventDate) return 0;
+    if (!eventDate || !actualEventTimestamp) return 0;
 
-    const [year, month, day] = eventDate.split("-").map(Number);
-
-    const actualEventTimestamp = Math.floor(
-      new Date(year, month - 1, day).getTime() / 1000
-    );
-    console.log("actualEventTimestamp", actualEventTimestamp);
     // Subtract time from actual event for expiry values
     const bidExpiry = actualEventTimestamp - 2 * 86400; // 2 days before event
     const sellerExpiryTime = actualEventTimestamp - 1 * 86400; // 1 day before event
@@ -73,7 +73,7 @@ export default function SellPage() {
     });
   };
 
-  const handleProofVerified = (proof: any) => {
+  const handleProofVerified = (proof: Proof) => {
     setIsVerified(true);
     setProof(proof);
     try {
@@ -86,20 +86,23 @@ export default function SellPage() {
 
       // Parse IST date string to epoch
       if (params.transactionDate) {
-        // "05/06/2025 19:20:00" + " +05:30"
-        const istDateString = params.transactionDate + " +05:30";
-        // Convert DD/MM/YYYY to YYYY-MM-DD for ISO
-        const isoDateString = istDateString.replace(
-          /^(\d{2})\/(\d{2})\/(\d{4})/,
-          '$3-$2-$1'
-        );
-        const date = new Date(isoDateString);
-        const actualEventTimestamp = Math.floor(date.getTime() / 1000);
-        setActualEventTimestamp(actualEventTimestamp);
-        console.log('actualEventTimestamp', actualEventTimestamp);
+        // Format: MM/DD/YYYY HH:MM:SS
+        const [datePart, timePart] = params.transactionDate.split(' ');
+        const [month, day, year] = datePart.split('/').map(Number);
+        const [hours, minutes, seconds] = timePart.split(':').map(Number);
+        
+        // Create date in IST (UTC+5:30)
+        const date = new Date(Date.UTC(year, month - 1, day, hours, minutes, seconds));
+        // Adjust for IST (UTC+5:30)
+        date.setHours(date.getHours() - 5);
+        date.setMinutes(date.getMinutes() - 30);
+        
+        const timestamp = Math.floor(date.getTime() / 1000);
+        setActualEventTimestamp(timestamp);
+        console.log('actualEventTimestamp', timestamp);
       }
-    } catch (e) {
-      // fallback: do nothing or show error
+    } catch (error) {
+      console.error('Error parsing proof data:', error);
     }
   };
 
