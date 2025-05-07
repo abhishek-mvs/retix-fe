@@ -8,6 +8,8 @@ import { toast } from "sonner";
 import { Ticket } from "@/types";
 import { formatTimeLeft } from "@/utils/formatters";
 import { Suspense } from "react";
+import SellerTicketVerifierQR from "@/components/seller-ticket-verifier";
+import { confirmTicketDelivery } from "@/calls/confirm-ticket-delivery";
 
 export default function MyTicketsPage() {
   return (
@@ -25,21 +27,39 @@ export default function MyTicketsPage() {
 }
 
 function MyTicketsContent() {
-  const { tickets, loading, error } = useSellerTickets();
+  const { tickets, loading, error, refetch } = useSellerTickets();
   const [verifyingTicketId, setVerifyingTicketId] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState<'active' | 'pending' | 'past'>('active');
+  const [showVerifier, setShowVerifier] = useState(false);
+  const [isConfirming, setIsConfirming] = useState(false);
 
   const handleVerifyTicket = async (ticketId: number) => {
     setVerifyingTicketId(ticketId);
+    setShowVerifier(true);
+  };
+
+  const handleVerificationComplete = async (proof: { claimData: { context: string } }) => {
+    if (!verifyingTicketId) return;
+    
     try {
-      // Dummy verification flow - simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      toast.success("Ticket verified successfully!");
+      setIsConfirming(true);
+      // Here you would typically send the proof to your backend/contract
+      console.log("Verification proof:", proof);
+      
+      // Call the contract to confirm ticket delivery
+      await confirmTicketDelivery(verifyingTicketId);
+      
+      toast.success("Ticket verified and delivery confirmed successfully!");
+      setShowVerifier(false);
+      
+      // Refresh the tickets list to show updated status
+      await refetch();
     } catch (error) {
       console.error(error);
-      toast.error("Failed to verify ticket");
+      toast.error("Failed to verify and confirm ticket delivery");
     } finally {
       setVerifyingTicketId(null);
+      setIsConfirming(false);
     }
   };
 
@@ -79,6 +99,40 @@ function MyTicketsContent() {
     <div className="min-h-screen bg-white">
       <div className="max-w-7xl mx-auto px-4">
         <Navbar />
+
+        {/* Verification Modal */}
+        {showVerifier && verifyingTicketId && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+              {isConfirming ? (
+                <div className="flex flex-col items-center justify-center p-6">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mb-4"></div>
+                  <p className="text-lg text-gray-600">Confirming ticket delivery...</p>
+                  <p className="text-sm text-gray-500 mt-2">Please wait while we process your transaction</p>
+                </div>
+              ) : (
+                <>
+                  <SellerTicketVerifierQR 
+                    ticketId={verifyingTicketId}
+                    onVerified={handleVerificationComplete}
+                  />
+                  <div className="mt-4 flex justify-end">
+                    <Button
+                      onClick={() => {
+                        setShowVerifier(false);
+                        setVerifyingTicketId(null);
+                      }}
+                      variant="outline"
+                      className="mr-2"
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        )}
 
         <div className="py-8">
           <h1 className="text-3xl font-bold mb-8">My Tickets</h1>

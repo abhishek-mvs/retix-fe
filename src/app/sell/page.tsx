@@ -54,8 +54,8 @@ export default function SellPage() {
     if (!eventDate || !actualEventTimestamp) return 0;
 
     // Subtract time from actual event for expiry values
-    const bidExpiry = actualEventTimestamp - 2 * 86400; // 2 days before event
-    const sellerExpiryTime = actualEventTimestamp - 1 * 86400; // 1 day before event
+    const bidExpiry = actualEventTimestamp - 2 * 60; // 5 mins before event
+    const sellerExpiryTime = actualEventTimestamp + 45 * 60; // 2 mins before event
     console.log("bidExpiry", bidExpiry);
     console.log("sellerExpiryTime", sellerExpiryTime);
 
@@ -96,8 +96,10 @@ export default function SellPage() {
         date.setMinutes(date.getMinutes() - 30);
         
         const timestamp = Math.floor(date.getTime() / 1000);
-        setActualEventTimestamp(1747765800);
-        console.log('actualEventTimestamp', timestamp);
+        
+        const timestamp10MinsFromNow = Math.floor((Date.now() + 10 * 60 * 1000) / 1000);
+        setActualEventTimestamp(timestamp10MinsFromNow);
+        console.log('actualEventTimestamp', timestamp10MinsFromNow);
       }
     } catch (error) {
       console.error('Error parsing proof data:', error);
