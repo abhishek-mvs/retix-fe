@@ -11,6 +11,7 @@ import { formatTimestamp, formatTimeLeft } from "@/utils/formatters";
 export default function MyTicketsPage() {
   const { tickets, loading, error } = useSellerTickets();
   const [verifyingTicketId, setVerifyingTicketId] = useState<number | null>(null);
+  const [activeTab, setActiveTab] = useState<'active' | 'pending' | 'past'>('active');
 
   const handleVerifyTicket = async (ticketId: number) => {
     setVerifyingTicketId(ticketId);
@@ -45,87 +46,135 @@ export default function MyTicketsPage() {
         <div className="py-8">
           <h1 className="text-3xl font-bold mb-8">My Tickets</h1>
 
+          {/* Tab Navigation */}
+          <div className="border-b border-gray-200 mb-8">
+            <nav className="-mb-px flex space-x-8">
+              <button
+                onClick={() => setActiveTab('active')}
+                className={`${
+                  activeTab === 'active'
+                    ? 'border-green-500 text-green-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
+              >
+                Active Tickets
+                <span className="ml-2 bg-gray-100 text-gray-600 py-0.5 px-2 rounded-full text-xs">
+                  {activeTickets.length}
+                </span>
+              </button>
+              <button
+                onClick={() => setActiveTab('pending')}
+                className={`${
+                  activeTab === 'pending'
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
+              >
+                Pending Verification
+                <span className="ml-2 bg-gray-100 text-gray-600 py-0.5 px-2 rounded-full text-xs">
+                  {pendingTickets.length}
+                </span>
+              </button>
+              <button
+                onClick={() => setActiveTab('past')}
+                className={`${
+                  activeTab === 'past'
+                    ? 'border-gray-500 text-gray-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
+              >
+                Past Tickets
+                <span className="ml-2 bg-gray-100 text-gray-600 py-0.5 px-2 rounded-full text-xs">
+                  {pastTickets.length}
+                </span>
+              </button>
+            </nav>
+          </div>
+
           {/* Active Tickets Section */}
-          <section className="mb-12">
-            <h2 className="text-2xl font-semibold mb-6">Active Tickets</h2>
-            {activeTickets.length === 0 ? (
-              <EmptyState message="No active tickets" />
-            ) : (
-              <div className="grid gap-6">
-                {activeTickets.map((ticket) => (
-                  <div key={ticket.id} className="border rounded-lg p-4">
-                    <TicketCard ticket={ticket} type="upcoming" />
-                    <div className="mt-4 flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <span className="px-2 py-1 rounded text-sm bg-yellow-100 text-yellow-800">
-                          Bidding Active
-                        </span>
-                        <span className="text-sm text-gray-600">
-                          Expires in {formatTimeLeft(ticket.bidExpiryTime)}
-                        </span>
+          {activeTab === 'active' && (
+            <section>
+              {activeTickets.length === 0 ? (
+                <EmptyState message="No active tickets" />
+              ) : (
+                <div className="grid gap-6">
+                  {activeTickets.map((ticket) => (
+                    <div key={ticket.id} className="border rounded-lg p-4">
+                      <TicketCard ticket={ticket} type="upcoming" />
+                      <div className="mt-4 flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="px-2 py-1 rounded text-sm bg-yellow-100 text-yellow-800">
+                            Bidding Active
+                          </span>
+                          <span className="text-sm text-gray-600">
+                            Expires in {formatTimeLeft(ticket.bidExpiryTime)}
+                          </span>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </section>
+                  ))}
+                </div>
+              )}
+            </section>
+          )}
 
           {/* Pending Verification Section */}
-          <section className="mb-12">
-            <h2 className="text-2xl font-semibold mb-6">Pending Verification</h2>
-            {pendingTickets.length === 0 ? (
-              <EmptyState message="No tickets pending verification" />
-            ) : (
-              <div className="grid gap-6">
-                {pendingTickets.map((ticket) => (
-                  <div key={ticket.id} className="border rounded-lg p-4">
-                    <TicketCard ticket={ticket} type="upcoming" />
-                    <div className="mt-4 flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <span className="px-2 py-1 rounded text-sm bg-blue-100 text-blue-800">
-                          Pending Verification
-                        </span>
-                        <span className="text-sm text-gray-600">
-                          Verify within {formatTimeLeft(ticket.sellerExpiryTime)}
-                        </span>
+          {activeTab === 'pending' && (
+            <section>
+              {pendingTickets.length === 0 ? (
+                <EmptyState message="No tickets pending verification" />
+              ) : (
+                <div className="grid gap-6">
+                  {pendingTickets.map((ticket) => (
+                    <div key={ticket.id} className="border rounded-lg p-4">
+                      <TicketCard ticket={ticket} type="upcoming" />
+                      <div className="mt-4 flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="px-2 py-1 rounded text-sm bg-blue-100 text-blue-800">
+                            Pending Verification
+                          </span>
+                          <span className="text-sm text-gray-600">
+                            Verify within {formatTimeLeft(ticket.sellerExpiryTime)}
+                          </span>
+                        </div>
+                        <Button 
+                          onClick={() => handleVerifyTicket(ticket.id)}
+                          disabled={verifyingTicketId === ticket.id}
+                          className="bg-blue-600 hover:bg-blue-700 text-white"
+                        >
+                          {verifyingTicketId === ticket.id ? 'Verifying...' : 'Verify Ticket Sent'}
+                        </Button>
                       </div>
-                      <Button 
-                        onClick={() => handleVerifyTicket(ticket.id)}
-                        disabled={verifyingTicketId === ticket.id}
-                        className="bg-blue-600 hover:bg-blue-700 text-white"
-                      >
-                        {verifyingTicketId === ticket.id ? 'Verifying...' : 'Verify Ticket Sent'}
-                      </Button>
                     </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </section>
+                  ))}
+                </div>
+              )}
+            </section>
+          )}
 
           {/* Past Tickets Section */}
-          <section>
-            <h2 className="text-2xl font-semibold mb-6">Past Tickets</h2>
-            {pastTickets.length === 0 ? (
-              <EmptyState message="No past tickets" />
-            ) : (
-              <div className="grid gap-6">
-                {pastTickets.map((ticket) => (
-                  <div key={ticket.id} className="border rounded-lg p-4">
-                    <TicketCard ticket={ticket} type="past" />
-                    <div className="mt-4 flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <span className="px-2 py-1 rounded text-sm bg-green-100 text-green-800">
-                          Sold
-                        </span>
+          {activeTab === 'past' && (
+            <section>
+              {pastTickets.length === 0 ? (
+                <EmptyState message="No past tickets" />
+              ) : (
+                <div className="grid gap-6">
+                  {pastTickets.map((ticket) => (
+                    <div key={ticket.id} className="border rounded-lg p-4">
+                      <TicketCard ticket={ticket} type="past" />
+                      <div className="mt-4 flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="px-2 py-1 rounded text-sm bg-green-100 text-green-800">
+                            Sold
+                          </span>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </section>
+                  ))}
+                </div>
+              )}
+            </section>
+          )}
         </div>
       </div>
     </div>
