@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { BrowserProvider, Contract } from "ethers";
 import ABI from "../data/abi.json";
 import { Ticket } from "@/types";
@@ -9,7 +9,7 @@ export const useTicketById = (id: number | string) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchTicket = async () => {
+  const fetchTicket = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -28,13 +28,13 @@ export const useTicketById = (id: number | string) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
 
   useEffect(() => {
     if (id !== undefined && id !== null) {
       fetchTicket();
     }
-  }, [id]);
+  }, [id, fetchTicket]);
 
   return { ticket, loading, error, refetch: fetchTicket };
 };

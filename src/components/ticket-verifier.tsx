@@ -16,7 +16,6 @@ interface Proof {
 function TicketVerfierQR({ onVerified }: { onVerified?: (proof: Proof) => void }) {
   // State to store the verification request URL
   const [requestUrl, setRequestUrl] = useState("");
-  const [proofs, setProofs] = useState<string[]>([]);
 
   const getVerificationReq = useCallback(async () => {
     // Initialize the Reclaim SDK with your credentials
@@ -39,8 +38,6 @@ function TicketVerfierQR({ onVerified }: { onVerified?: (proof: Proof) => void }
           if (typeof proofs === "string") {
             // When using a custom callback url, the proof is returned to the callback url and we get a message instead of a proof
             console.log("SDK Message:", proofs);
-            setProofs([proofs]);
-            if (onVerified) onVerified({ claimData: { context: proofs } });
           } else if (typeof proofs !== "string") {
             // When using the default callback url, we get a proof object in the response
             if (Array.isArray(proofs)) {

@@ -1,10 +1,26 @@
 "use client";
+import { Suspense } from "react";
 import Navbar from "@/components/navbar";
 import { Button } from "@/components/ui/button";
 import TicketCard from "@/components/ticket-card";
 import { useTickets } from "@/calls/get-tickets";
 
-export default function MyTicketsPage() {
+export default function EventsPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
+          <p className="text-lg text-gray-600">Loading...</p>
+        </div>
+      </div>
+    }>
+      <EventsContent />
+    </Suspense>
+  );
+}
+
+function EventsContent() {
   const { tickets, loading, error } = useTickets();
 
   if (loading) return <p>Loading...</p>;

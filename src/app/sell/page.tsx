@@ -35,7 +35,6 @@ export default function SellPage() {
   const [eventDetails, setEventDetails] = useState("");
   const [finalEstimate, setFinalEstimate] = useState<number | null>(null);
   const [isVerified, setIsVerified] = useState(false);
-  const [proof, setProof] = useState<Proof | null>(null);
   const [actualEventTimestamp, setActualEventTimestamp] = useState<number | null>(null);
 
   useEffect(() => {
@@ -75,7 +74,6 @@ export default function SellPage() {
 
   const handleProofVerified = (proof: Proof) => {
     setIsVerified(true);
-    setProof(proof);
     try {
       const context = JSON.parse(proof.claimData.context);
       const params = context.extractedParameters || {};
