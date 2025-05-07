@@ -7,7 +7,7 @@ import {
   RECLAIM_APP_SECRET,
 } from "@/data/constants";
 
-function TicketVerfierQR() {
+function TicketVerfierQR({ onVerified }: { onVerified?: (proof: any) => void }) {
   // State to store the verification request URL
   const [requestUrl, setRequestUrl] = useState("");
   const [proofs, setProofs] = useState<string[]>([]);
@@ -23,7 +23,7 @@ function TicketVerfierQR() {
       RECLAIM_APP_SECRET,
       PROVIDER_ID
     );
-
+  
     // Generate the verification request URL
     const requestUrl = await reclaimProofRequest.getRequestUrl();
     console.log("Request URL:", requestUrl);
@@ -38,6 +38,7 @@ function TicketVerfierQR() {
             // When using a custom callback url, the proof is returned to the callback url and we get a message instead of a proof
             console.log("SDK Message:", proofs);
             setProofs([proofs]);
+            if (onVerified) onVerified(proofs);
           } else if (typeof proofs !== "string") {
             // When using the default callback url, we get a proof object in the response
             if (Array.isArray(proofs)) {
@@ -47,10 +48,12 @@ function TicketVerfierQR() {
                 JSON.stringify(proofs.map((p) => p.claimData.context))
               );
               // setProofs(proofs);
+              if (onVerified) onVerified(proofs);
             } else {
               // when using provider with a single proof, we get a single proof object
               console.log("Verification success", proofs?.claimData.context);
               // setProofs(proofs);
+              if (onVerified) onVerified(proofs);
             }
           }
         }
