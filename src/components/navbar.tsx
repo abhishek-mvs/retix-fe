@@ -24,6 +24,7 @@ export default function Navbar() {
         <NavLink href="/sell">Sell</NavLink>
         {/* <NavLink href="/favorites">Favorites</NavLink> */}
         <NavLink href="/my-tickets">My Tickets</NavLink>
+        <NavLink href="/my-bids">My Bids</NavLink>
         <WalletConnectButton />
       </div>
     </nav>
