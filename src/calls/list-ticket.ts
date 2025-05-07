@@ -96,7 +96,8 @@ export function useListTicket() {
         );
 
         console.log("Simulation successful, proceeding with transaction");
-      } catch (simError: any) {
+      } catch (error: unknown) {
+        const simError = error as Error;
         console.error("Simulation failed:", simError);
         // Try to extract more useful error information
         if (simError.message) {

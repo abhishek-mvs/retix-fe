@@ -1,11 +1,5 @@
 import { BrowserProvider, Signer } from "ethers";
 
-declare global {
-  interface Window {
-    ethereum?: import("ethers").Eip1193Provider;
-  }
-}
-
 export interface WalletInfo {
   signer: Signer;
   provider: BrowserProvider;

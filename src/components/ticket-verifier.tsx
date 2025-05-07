@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import QRCode from "react-qr-code";
-import { Proof, ReclaimProofRequest } from "@reclaimprotocol/js-sdk";
+import { ReclaimProofRequest } from "@reclaimprotocol/js-sdk";
 import {
   PROVIDER_ID,
   RECLAIM_APP_ID,

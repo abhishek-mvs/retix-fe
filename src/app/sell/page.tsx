@@ -17,7 +17,10 @@ import TicketVerfierQR from "@/components/ticket-verifier";
 // } from "@/components/ui/select";
 
 export default function SellPage() {
-  const { listTicket, loading, error, txHash } = useListTicket();
+  const {
+    listTicket,
+    //  loading, error, txHash
+  } = useListTicket();
   const [eventName, setEventName] = useState("");
   const [eventDate, setEventDate] = useState("");
   const [eventTime, setEventTime] = useState("");
