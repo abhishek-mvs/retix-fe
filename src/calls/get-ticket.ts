@@ -4,12 +4,12 @@ import ABI from "../data/abi.json";
 import { Ticket } from "@/types";
 import { CONTRACT_ADDRESS } from "@/data/constants";
 
-export const useTickets = () => {
-  const [tickets, setTickets] = useState<Ticket[]>([]);
+export const useTicketById = (id: number | string) => {
+  const [ticket, setTicket] = useState<Ticket | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchTickets = async () => {
+  const fetchTicket = async () => {
     try {
       setLoading(true);
       setError(null);
@@ -20,8 +20,8 @@ export const useTickets = () => {
       const signer = await provider.getSigner();
       const contract = new Contract(CONTRACT_ADDRESS, ABI, signer);
 
-      const allTickets: Ticket[] = await contract.getAllTickets();
-      setTickets(allTickets);
+      const ticketData: Ticket = await contract.tickets(id);
+      setTicket(ticketData);
     } catch (err) {
       console.error(err);
       setError((err as Error).message);
@@ -31,8 +31,10 @@ export const useTickets = () => {
   };
 
   useEffect(() => {
-    fetchTickets();
-  }, []);
+    if (id !== undefined && id !== null) {
+      fetchTicket();
+    }
+  }, [id]);
 
-  return { tickets, loading, error, refetch: fetchTickets };
+  return { ticket, loading, error, refetch: fetchTicket };
 };

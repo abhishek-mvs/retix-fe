@@ -5,6 +5,7 @@ import { Calendar, Download, Share2, QrCode, MapPin } from "lucide-react";
 import Image from "next/image";
 import { Ticket } from "@/types";
 import { formatTimestamp, getIPFSUrl } from "@/utils/formatters";
+import { useRouter } from "next/navigation";
 
 interface TicketCardProps {
   ticket: Ticket;
@@ -12,8 +13,12 @@ interface TicketCardProps {
 }
 
 export default function TicketCard({ ticket, type }: TicketCardProps) {
+  const router = useRouter();
+  const redirectToTicket = () => {
+    router.push(`/events/${ticket.id}`);
+  };
   return (
-    <Card className="overflow-hidden">
+    <Card className="overflow-hidden" onClick={redirectToTicket}>
       <CardContent className="p-0">
         <div className="grid md:grid-cols-4 gap-4">
           <div className="relative h-48 md:h-full">
