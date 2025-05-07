@@ -6,10 +6,26 @@ import Link from "next/link";
 import Image from "next/image";
 import { useTicketById } from "@/calls/get-ticket";
 import { formatTimestamp } from "@/utils/formatters";
+import { useState } from "react";
+import BidPopup from "@/components/bid-popup";
 
 export default function EventPage({ id }: { id: number }) {
   const { ticket } = useTicketById(id);
+  const [isBidPopupOpen, setIsBidPopupOpen] = useState(false);
 
+  const handleOpenBidPopup = () => {
+    setIsBidPopupOpen(true);
+  };
+
+  const handleCloseBidPopup = () => {
+    setIsBidPopupOpen(false);
+  };
+
+  const handleSubmitBid = (amount: number) => {
+    // In a real app, you would submit the bid to your backend
+    console.log(`Bid submitted: $${amount.toFixed(2)}`);
+    // You could show a success message or redirect
+  };
   if (!ticket) return <p>Loading...</p>;
 
   return (
@@ -48,11 +64,25 @@ export default function EventPage({ id }: { id: number }) {
             <p className="text-gray-700">{Number(ticket.minBid)}</p>
           </div>
 
-          <Button className="w-full bg-green-600 hover:bg-green-700 text-white py-3">
+          <Button
+            className="w-full bg-green-600 hover:bg-green-700 text-white py-3"
+            onClick={handleOpenBidPopup}
+          >
             Place a Bid
           </Button>
         </div>
       </div>
+
+      <BidPopup
+        isOpen={isBidPopupOpen}
+        onClose={handleCloseBidPopup}
+        eventName={ticket.eventName}
+        eventDate={`ed at wd`}
+        eventLocation={ticket.eventLocation}
+        currentPrice={ticket.minBid.toString()}
+        minBidIncrement={ticket.minBid.toString()}
+        onSubmitBid={handleSubmitBid}
+      />
     </div>
   );
 }
