@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useListTicket } from "@/calls/list-ticket";
+import TicketVerfierQR from "@/components/ticket-verifier";
 // import {
 //   Select,
 //   SelectContent,
@@ -81,6 +82,8 @@ export default function SellPage() {
           </Link>
 
           <h1 className="text-3xl font-bold mb-8">Sell Your Tickets</h1>
+
+          <TicketVerfierQR />
 
           <div className="grid md:grid-cols-3 gap-8">
             <div className="md:col-span-2">
