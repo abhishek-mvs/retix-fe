@@ -35,8 +35,23 @@ export default function MyTicketsPage() {
   const pendingTickets = tickets.filter(ticket => isBiddingPeriodEnded(ticket) && !ticket.sold);
   const pastTickets = tickets.filter(ticket => ticket.sold);
 
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>Error: {error}</p>;
+  if (loading) return (
+    <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
+        <p className="text-lg text-gray-600">Loading your tickets...</p>
+      </div>
+    </div>
+  );
+  
+  if (error) return (
+    <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="text-center p-6 bg-red-50 rounded-lg max-w-md">
+        <p className="text-red-600 font-medium text-lg">Error: {error}</p>
+        <Button className="mt-4 bg-red-600 hover:bg-red-700 text-white">Try Again</Button>
+      </div>
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-white">
