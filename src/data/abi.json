@@ -256,6 +256,26 @@
             "type": "string"
           },
           {
+            "internalType": "string",
+            "name": "eventName",
+            "type": "string"
+          },
+          {
+            "internalType": "uint256",
+            "name": "eventDate",
+            "type": "uint256"
+          },
+          {
+            "internalType": "string",
+            "name": "eventLocation",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "ticketImage",
+            "type": "string"
+          },
+          {
             "internalType": "uint256",
             "name": "minBid",
             "type": "uint256"
@@ -283,6 +303,11 @@
           {
             "internalType": "uint256",
             "name": "sellerExpiryTime",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "createdAt",
             "type": "uint256"
           },
           {
@@ -332,6 +357,26 @@
             "type": "string"
           },
           {
+            "internalType": "string",
+            "name": "eventName",
+            "type": "string"
+          },
+          {
+            "internalType": "uint256",
+            "name": "eventDate",
+            "type": "uint256"
+          },
+          {
+            "internalType": "string",
+            "name": "eventLocation",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "ticketImage",
+            "type": "string"
+          },
+          {
             "internalType": "uint256",
             "name": "minBid",
             "type": "uint256"
@@ -359,6 +404,11 @@
           {
             "internalType": "uint256",
             "name": "sellerExpiryTime",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "createdAt",
             "type": "uint256"
           },
           {
@@ -568,6 +618,26 @@
       {
         "internalType": "string",
         "name": "_details",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "_eventName",
+        "type": "string"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_eventDate",
+        "type": "uint256"
+      },
+      {
+        "internalType": "string",
+        "name": "_eventLocation",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "_ticketImage",
         "type": "string"
       },
       {
@@ -784,6 +854,26 @@
         "type": "string"
       },
       {
+        "internalType": "string",
+        "name": "eventName",
+        "type": "string"
+      },
+      {
+        "internalType": "uint256",
+        "name": "eventDate",
+        "type": "uint256"
+      },
+      {
+        "internalType": "string",
+        "name": "eventLocation",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "ticketImage",
+        "type": "string"
+      },
+      {
         "internalType": "uint256",
         "name": "minBid",
         "type": "uint256"
@@ -811,6 +901,11 @@
       {
         "internalType": "uint256",
         "name": "sellerExpiryTime",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "createdAt",
         "type": "uint256"
       },
       {

@@ -31,12 +31,16 @@ export type Ticket = {
   id: number; // uint256
   seller: string; // Ethereum address
   sellerFID: number;
+  eventName: number;
   eventDetails: string;
+  eventLocation: number;
+  ticketImage: number;
   minBid: bigint; // Use BigInt for uint256 values
   sold: boolean;
   buyer: string; // Ethereum address
   buyerFID: number;
   bidExpiry: number; // Timestamp in seconds (or bigint if needed)
+  sellerExpiryTime: number;
   isHighestBidderFound: boolean;
 };
 

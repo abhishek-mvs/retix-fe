@@ -1,19 +1,71 @@
 "use client";
+import { useEffect, useState } from "react";
 import Navbar from "@/components/navbar";
-import { ArrowLeft, Upload, Calendar, MapPin, Tag, Info } from "lucide-react";
+import { ArrowLeft, Calendar, MapPin, Tag, Info } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { useListTicket } from "@/calls/list-ticket";
+// import {
+//   Select,
+//   SelectContent,
+//   SelectItem,
+//   SelectTrigger,
+//   SelectValue,
+// } from "@/components/ui/select";
 
 export default function SellPage() {
+  const { listTicket, loading, error, txHash } = useListTicket();
+  const [eventName, setEventName] = useState("");
+  const [eventDate, setEventDate] = useState("");
+  const [eventTime, setEventTime] = useState("");
+  const [eventLocation, setEventLocation] = useState("");
+  const [ticketImage, setTicketImage] = useState("");
+  const [minBid, setMinBid] = useState("");
+  const [eventDetails, setEventDetails] = useState("");
+  const [finalEstimate, setFinalEstimate] = useState<number | null>(null);
+
+  useEffect(() => {
+    function calculateFinalPrice(): number {
+      const serviceFee = 2;
+      const finalPrice = parseInt(minBid) - serviceFee;
+      return finalPrice > 0 ? finalPrice : 0; // Prevent negative values
+    }
+    if (minBid != "") {
+      const price = calculateFinalPrice();
+      setFinalEstimate(price);
+    }
+  }, [minBid]);
+
+  const handleList = async () => {
+    console.log(eventDate, eventTime);
+    if (!eventDate || !eventTime) return 0;
+
+    const [year, month, day] = eventDate.split("-").map(Number);
+    const [hours, minutes] = eventTime.split(":").map(Number);
+
+    const actualEventTimestamp = Math.floor(
+      new Date(year, month - 1, day, hours, minutes).getTime() / 1000
+    );
+
+    // Subtract time from actual event for expiry values
+    const bidExpiry = actualEventTimestamp - 2 * 86400; // 2 days before event
+    const sellerExpiryTime = actualEventTimestamp - 1 * 86400; // 1 day before event
+
+    await listTicket({
+      eventDetails,
+      eventName,
+      eventDate: actualEventTimestamp,
+      eventLocation,
+      ticketImage,
+      sellerFID: 0,
+      minBid: parseInt(minBid),
+      bidExpiry,
+      sellerExpiryTime,
+    });
+  };
+
   return (
     <div className="min-h-screen bg-white">
       <div className="max-w-7xl mx-auto px-4">
@@ -36,7 +88,7 @@ export default function SellPage() {
                 <h2 className="text-xl font-semibold mb-4">Event Details</h2>
 
                 <div className="space-y-4">
-                  <div>
+                  {/* <div>
                     <label
                       htmlFor="event-type"
                       className="block text-sm font-medium text-gray-700 mb-1"
@@ -54,7 +106,7 @@ export default function SellPage() {
                         <SelectItem value="other">Other</SelectItem>
                       </SelectContent>
                     </Select>
-                  </div>
+                  </div> */}
 
                   <div>
                     <label
@@ -63,7 +115,11 @@ export default function SellPage() {
                     >
                       Event Name
                     </label>
-                    <Input id="event-name" placeholder="Enter event name" />
+                    <Input
+                      id="event-name"
+                      placeholder="Enter event name"
+                      onChange={(e) => setEventName(e.target.value)}
+                    />
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
@@ -76,7 +132,12 @@ export default function SellPage() {
                       </label>
                       <div className="relative">
                         <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                        <Input id="event-date" type="date" className="pl-10" />
+                        <Input
+                          id="event-date"
+                          type="date"
+                          className="pl-10"
+                          onChange={(e) => setEventDate(e.target.value)}
+                        />
                       </div>
                     </div>
                     <div>
@@ -86,7 +147,11 @@ export default function SellPage() {
                       >
                         Event Time
                       </label>
-                      <Input id="event-time" type="time" />
+                      <Input
+                        id="event-time"
+                        type="time"
+                        onChange={(e) => setEventTime(e.target.value)}
+                      />
                     </div>
                   </div>
 
@@ -103,6 +168,7 @@ export default function SellPage() {
                         id="event-location"
                         placeholder="Enter venue name"
                         className="pl-10"
+                        onChange={(e) => setEventLocation(e.target.value)}
                       />
                     </div>
                   </div>
@@ -113,7 +179,7 @@ export default function SellPage() {
                 <h2 className="text-xl font-semibold mb-4">Ticket Details</h2>
 
                 <div className="space-y-4">
-                  <div>
+                  {/* <div>
                     <label
                       htmlFor="ticket-type"
                       className="block text-sm font-medium text-gray-700 mb-1"
@@ -135,10 +201,10 @@ export default function SellPage() {
                         <SelectItem value="box">Box Seats</SelectItem>
                       </SelectContent>
                     </Select>
-                  </div>
+                  </div> */}
 
                   <div className="grid grid-cols-2 gap-4">
-                    <div>
+                    {/* <div>
                       <label
                         htmlFor="quantity"
                         className="block text-sm font-medium text-gray-700 mb-1"
@@ -151,13 +217,13 @@ export default function SellPage() {
                         min="1"
                         placeholder="Number of tickets"
                       />
-                    </div>
+                    </div> */}
                     <div>
                       <label
                         htmlFor="price"
                         className="block text-sm font-medium text-gray-700 mb-1"
                       >
-                        Price per Ticket ($)
+                        Min Bid ($)
                       </label>
                       <div className="relative">
                         <Tag className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
@@ -168,6 +234,7 @@ export default function SellPage() {
                           step="0.01"
                           placeholder="0.00"
                           className="pl-10"
+                          onChange={(e) => setMinBid(e.target.value)}
                         />
                       </div>
                     </div>
@@ -184,9 +251,24 @@ export default function SellPage() {
                       id="description"
                       placeholder="Add details about your tickets (section, row, etc.)"
                       rows={4}
+                      onChange={(e) => setEventDetails(e.target.value)}
                     />
                   </div>
-
+                  <div>
+                    <label
+                      htmlFor="image"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
+                      Ticket Image URI
+                    </label>
+                    <Input
+                      id="image"
+                      type="text"
+                      placeholder="Image URI"
+                      onChange={(e) => setTicketImage(e.target.value)}
+                    />
+                  </div>
+                  {/* 
                   <div>
                     <label
                       htmlFor="ticket-upload"
@@ -215,7 +297,7 @@ export default function SellPage() {
                         Select Files
                       </Button>
                     </div>
-                  </div>
+                  </div> */}
                 </div>
               </div>
             </div>
@@ -227,12 +309,12 @@ export default function SellPage() {
                 <div className="space-y-4">
                   <div className="flex justify-between">
                     <span className="text-gray-600">Service Fee</span>
-                    <span>Calculated at checkout</span>
+                    <span>$2</span>
                   </div>
 
                   <div className="flex justify-between font-semibold">
-                    <span>You&apos;ll Receive</span>
-                    <span>$0.00</span>
+                    <span>Estimate you&apos;ll Receive</span>
+                    <span>${finalEstimate ? finalEstimate : "---"}</span>
                   </div>
 
                   <div className="bg-green-50 p-4 rounded-lg text-sm text-green-800 flex">
@@ -244,7 +326,10 @@ export default function SellPage() {
                     </p>
                   </div>
 
-                  <Button className="w-full bg-green-600 hover:bg-green-700 text-white">
+                  <Button
+                    className="w-full bg-green-600 hover:bg-green-700 text-white cursor-pointer"
+                    onClick={handleList}
+                  >
                     List Tickets for Sale
                   </Button>
                 </div>
