@@ -1,15 +1,15 @@
 import { useEffect, useState } from "react";
 import { BrowserProvider, Contract } from "ethers";
 import ABI from "../data/abi.json";
-import { Ticket } from "@/types";
+import { Bid } from "@/types";
 import { CONTRACT_ADDRESS } from "@/data/constants";
 
-export const useTickets = () => {
-  const [tickets, setTickets] = useState<Ticket[]>([]);
+export const useUserBids = () => {
+  const [bids, setBids] = useState<Bid[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchTickets = async () => {
+  const fetchUserBids = async () => {
     try {
       setLoading(true);
       setError(null);
@@ -20,9 +20,9 @@ export const useTickets = () => {
       const signer = await provider.getSigner();
       const contract = new Contract(CONTRACT_ADDRESS, ABI, signer);
 
-      const allTickets: Ticket[] = await contract.getAllTickets();
-      console.log("allTickets", allTickets);
-      setTickets(allTickets);
+      const userBids: Bid[] = await contract.getUserBids(await signer.getAddress());
+      console.log("userBids", userBids);
+      setBids(userBids);
     } catch (err) {
       console.error(err);
       setError((err as Error).message);
@@ -32,8 +32,8 @@ export const useTickets = () => {
   };
 
   useEffect(() => {
-    fetchTickets();
+    fetchUserBids();
   }, []);
 
-  return { tickets, loading, error, refetch: fetchTickets };
-};
+  return { bids, loading, error, refetch: fetchUserBids };
+}; 

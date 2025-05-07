@@ -55,7 +55,9 @@ export type Bid = {
   ticketId: number;
   bidder: string;
   amount: bigint;
-  timestamp: number;
+  timestamp: bigint;
+  isActive: boolean;
+  isAccepted: boolean;
 };
 
 export type TicketStatus = "available" | "sold" | "expired" | "refunded";
