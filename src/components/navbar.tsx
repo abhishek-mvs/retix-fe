@@ -20,7 +20,7 @@ export default function Navbar() {
       </div>
 
       <div className="flex items-center space-x-6">
-        {/* <NavLink href="/explore">Explore</NavLink> */}
+        <NavLink href="/explore">Explore</NavLink>
         <NavLink href="/sell">Sell</NavLink>
         {/* <NavLink href="/favorites">Favorites</NavLink> */}
         <NavLink href="/my-tickets">My Tickets</NavLink>

@@ -1,6 +1,5 @@
 "use client";
 import Navbar from "@/components/navbar";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Calendar, Download, Share2, QrCode } from "lucide-react";
@@ -20,31 +19,17 @@ export default function MyTicketsPage() {
         <Navbar />
 
         <div className="py-8">
-          <h1 className="text-3xl font-bold mb-8">My Tickets</h1>
+          <h1 className="text-3xl font-bold mb-8">All Tickets</h1>
 
-          <Tabs defaultValue="upcoming" className="w-full">
-            <TabsList className="grid w-full grid-cols-3 mb-8">
-              <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
-              <TabsTrigger value="past">Past</TabsTrigger>
-              <TabsTrigger value="selling">Selling</TabsTrigger>
-            </TabsList>
-
-            {tickets.length === 0 ? (
-              <EmptyState message="You don't have any upcoming tickets" />
-            ) : (
-              <div className="grid gap-6">
-                {tickets.map((ticket) => (
-                  <TicketCard key={ticket.id} ticket={ticket} type="upcoming" />
-                  // <div key={ticket.id.toString()}>
-                  //   <p>Event: {ticket.eventDetails}</p>
-                  //   <p>Min Bid: {ticket.minBid.toString()}</p>
-                  //   <p>Seller: {ticket.seller}</p>
-                  //   <hr />
-                  // </div>
-                ))}
-              </div>
-            )}
-          </Tabs>
+          {tickets.length === 0 ? (
+            <EmptyState message="You don't have any upcoming tickets" />
+          ) : (
+            <div className="grid gap-6">
+              {tickets.map((ticket) => (
+                <TicketCard key={ticket.id} ticket={ticket} type="upcoming" />
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>
