@@ -126,13 +126,6 @@ export default function SellPage() {
             <TicketVerfierQR onVerified={handleProofVerified} />
           ) : (
             <>
-              {/* Display proof for demonstration */}
-              {proof && (
-                <div className="mb-6 p-4 bg-gray-50 border rounded">
-                  <h3 className="font-semibold mb-2">Verification Proof:</h3>
-                  <pre className="text-xs overflow-x-auto">{JSON.stringify(proof, null, 2)}</pre>
-                </div>
-              )}
               <div className="grid md:grid-cols-3 gap-8">
                 <div className="md:col-span-2">
                   <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6">

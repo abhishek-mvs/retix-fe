@@ -70,24 +70,31 @@ function TicketVerfierQR({ onVerified }: { onVerified?: (proof: Proof) => void }
   }, [getVerificationReq]);
 
   return (
-    <>
-      {/* <button onClick={getVerificationReq}>Get Verification Request</button> */}
-      {/* Display QR code when URL is available */}
-      {requestUrl && (
+    <div className="flex flex-col items-center justify-center p-6 bg-gray-50 rounded-lg border border-gray-200">
+      <h2 className="text-xl font-semibold mb-4">Add Your Ticket</h2>
+      <p className="text-gray-600 mb-6">Scan this QR code with your phone to verify your ticket details</p>
+      
+      {requestUrl ? (
         <>
-          <div style={{ margin: "20px 0" }}>
-            <QRCode value={requestUrl} />
+          <div className="mb-6 p-4 bg-white rounded-lg shadow-sm">
+            <QRCode value={requestUrl} size={256} />
           </div>
-          <div>Or visit this link: {requestUrl}</div>
+          <p className="text-gray-600 mb-2">Or use this link to add your ticket:</p>
+          <a 
+            href={requestUrl} 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-green-600 hover:text-green-800 underline font-medium"
+          >
+            Verify and Add Ticket
+          </a>
         </>
-      )}
-      {proofs && (
-        <div>
-          <h2>Verification Successful!</h2>
-          <pre>{JSON.stringify(proofs, null, 2)}</pre>
+      ) : (
+        <div className="flex items-center justify-center h-64 w-full">
+          <p className="text-gray-500">Preparing verification...</p>
         </div>
       )}
-    </>
+    </div>
   );
 }
 
