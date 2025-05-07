@@ -7,6 +7,7 @@ import { Bid } from "@/types";
 import { format } from "date-fns";
 import { useState } from "react";
 import Image from "next/image";
+import { formatUSDC } from "@/utils/formatters";
 
 export default function MyBidsPage() {
   const { bids, loading: bidsLoading, error: bidsError } = useUserBids();
@@ -27,11 +28,6 @@ export default function MyBidsPage() {
 
   const formatDate = (timestamp: bigint) => {
     return format(new Date(Number(timestamp) * 1000), "MMM dd, yyyy HH:mm");
-  };
-
-  const formatUSDC = (amount: bigint) => {
-    // Convert from 6 decimals to USDC
-    return Number(amount) / 1_000_000;
   };
 
   const filteredBids = bids.filter((bid) => 

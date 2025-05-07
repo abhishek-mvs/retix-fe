@@ -31,6 +31,7 @@ function WalletProviderContent({ children }: { children: React.ReactNode }) {
       
       // Check if there's a redirect URL
       const redirectUrl = searchParams.get('redirect');
+      console.log('redirectUrl', redirectUrl);
       if (redirectUrl) {
         router.push(redirectUrl);
       }

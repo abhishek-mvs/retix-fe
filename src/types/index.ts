@@ -34,6 +34,7 @@ export type Ticket = {
   eventName: string;
   eventDetails: string;
   eventLocation: string;
+  eventDate: number;
   ticketImage: string;
   minBid: bigint; // Use BigInt for uint256 values
   sold: boolean;

@@ -35,3 +35,8 @@ export const getIPFSUrl = (ipfsUrl: string) => {
   }
   return ipfsUrl;
 };
+
+export function formatUSDC(amount: bigint): number {
+  // Convert from 6 decimals to USDC
+  return Number(amount) / 1_000_000;
+}

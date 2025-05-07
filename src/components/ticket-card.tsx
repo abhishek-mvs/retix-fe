@@ -38,7 +38,7 @@ export default function TicketCard({ ticket, type }: TicketCardProps) {
                 <div className="space-y-2 text-gray-600">
                   <div className="flex items-center">
                     <Calendar className="h-4 w-4 mr-2" />
-                    <span>{formatTimestamp(ticket.bidExpiryTime)}</span>
+                    <span>{formatTimestamp(ticket.eventDate)}</span>
                   </div>
                   {/* <div className="flex items-center">
                     <Clock className="h-4 w-4 mr-2" />
