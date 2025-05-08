@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
 import {
   Dialog,
@@ -37,16 +36,10 @@ export default function BidPopup({
   minBid,
   onSubmitBid,
 }: BidPopupProps) {
-  const [bidAmount, setBidAmount] = useState("")
   const [email, setEmail] = useState("")
   const [error, setError] = useState<string | null>(null)
 
   const minBidValue = minBid ? Number.parseFloat(minBid.replace(/[^0-9.]/g, "")) : 0
-
-  const handleBidChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setBidAmount(e.target.value)
-    setError(null)
-  }
 
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setEmail(e.target.value)
@@ -54,13 +47,6 @@ export default function BidPopup({
   }
 
   const handleSubmit = () => {
-    const amount = Number.parseFloat(bidAmount)
-
-    if (isNaN(amount)) {
-      setError("Please enter a valid bid amount")
-      return
-    }
-
     if (!email) {
       setError("Please enter your email address")
       return
@@ -71,8 +57,7 @@ export default function BidPopup({
       return
     }
 
-    onSubmitBid(amount, email)
-    setBidAmount("")
+    onSubmitBid(minBidValue, email)
     setEmail("")
     onClose()
   }
@@ -81,9 +66,9 @@ export default function BidPopup({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Place a Bid</DialogTitle>
+          <DialogTitle>Purchase Ticket</DialogTitle>
           <DialogDescription>
-            Enter your bid amount for this ticket. The minimum bid is {minBid}.
+            Enter your email to purchase this ticket for {minBid}.
           </DialogDescription>
         </DialogHeader>
 
@@ -97,29 +82,12 @@ export default function BidPopup({
           <Separator />
 
           <div>
-            <Label htmlFor="min-bid" className="text-sm text-gray-500">
-              Minimum Bid Required
+            <Label htmlFor="ticket-price" className="text-sm text-gray-500">
+              Ticket Price
             </Label>
-            <p id="min-bid" className="font-semibold">
+            <p id="ticket-price" className="font-semibold text-green-600">
               {minBid}
             </p>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="bid-amount">Your Bid (USD)</Label>
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
-              <Input
-                id="bid-amount"
-                type="number"
-                step="0.01"
-                min={minBidValue}
-                placeholder={minBidValue.toFixed(2)}
-                className="pl-8"
-                value={bidAmount}
-                onChange={handleBidChange}
-              />
-            </div>
           </div>
 
           <div className="space-y-2">
@@ -143,7 +111,7 @@ export default function BidPopup({
           <div className="bg-green-50 p-3 rounded-md flex items-start space-x-2">
             <Info className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
             <div className="text-sm text-green-800">
-              <p>Your card will only be charged if your bid is accepted by the seller.</p>
+              <p>Your card will be charged {minBid} for this ticket purchase.</p>
             </div>
           </div>
         </div>
@@ -153,7 +121,7 @@ export default function BidPopup({
             Cancel
           </Button>
           <Button onClick={handleSubmit} className="bg-green-600 hover:bg-green-700 text-white">
-            Place Bid
+            Purchase Ticket
           </Button>
         </DialogFooter>
       </DialogContent>
