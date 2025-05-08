@@ -28,12 +28,13 @@ export function useAddUserBid() {
     }
   };
 
-  const placeBid = async (ticketId: number, bidAmount: number) => {
+  const placeBid = async (ticketId: number, bidAmount: number, email: string) => {
     try {
       setLoading(true);
       setError(null);
       console.log("ticketId", ticketId);
       console.log("bidAmount", bidAmount.toString());
+      console.log("email", email);
       const bidAmountWei = ethers.parseEther(bidAmount.toString());
       console.log("bidAmountWei", bidAmountWei);
       if (!window.ethereum) throw new Error("Wallet not detected");
@@ -50,6 +51,7 @@ export function useAddUserBid() {
         await contract.placeBid.staticCall(
           BigInt(ticketId),
           bidAmountWei,
+          email,
           { gasLimit: 3000000 }
         );
 
@@ -72,6 +74,7 @@ export function useAddUserBid() {
       const tx = await contract.placeBid(
         BigInt(ticketId),
         bidAmountWei,
+        email,
         { gasLimit: 3000000 }
       );
 

@@ -25,7 +25,7 @@ interface BidPopupProps {
   eventDate: string
   eventLocation: string
   minBid: string
-  onSubmitBid: (amount: number) => void
+  onSubmitBid: (amount: number, email: string) => void
 }
 
 export default function BidPopup({
@@ -38,12 +38,18 @@ export default function BidPopup({
   onSubmitBid,
 }: BidPopupProps) {
   const [bidAmount, setBidAmount] = useState("")
+  const [email, setEmail] = useState("")
   const [error, setError] = useState<string | null>(null)
 
   const minBidValue = minBid ? Number.parseFloat(minBid.replace(/[^0-9.]/g, "")) : 0
 
   const handleBidChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setBidAmount(e.target.value)
+    setError(null)
+  }
+
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEmail(e.target.value)
     setError(null)
   }
 
@@ -55,13 +61,19 @@ export default function BidPopup({
       return
     }
 
-    // if (amount < minBidValue) {
-    //   setError(`Bid must be at least $${minBidValue.toFixed(2)}`)
-    //   return
-    // }
+    if (!email) {
+      setError("Please enter your email address")
+      return
+    }
 
-    onSubmitBid(amount)
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setError("Please enter a valid email address")
+      return
+    }
+
+    onSubmitBid(amount, email)
     setBidAmount("")
+    setEmail("")
     onClose()
   }
 
@@ -108,14 +120,25 @@ export default function BidPopup({
                 onChange={handleBidChange}
               />
             </div>
-
-            {error && (
-              <Alert variant="destructive" className="mt-2">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
           </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="email">Email Address</Label>
+            <Input
+              id="email"
+              type="email"
+              placeholder="Enter your email"
+              value={email}
+              onChange={handleEmailChange}
+            />
+          </div>
+
+          {error && (
+            <Alert variant="destructive" className="mt-2">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
 
           <div className="bg-green-50 p-3 rounded-md flex items-start space-x-2">
             <Info className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />

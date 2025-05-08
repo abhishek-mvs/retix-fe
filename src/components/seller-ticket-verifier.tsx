@@ -6,6 +6,8 @@ import {
   RECLAIM_APP_ID,
   RECLAIM_APP_SECRET,
 } from "@/data/constants";
+import { useBestBid } from "@/calls/get-best-bid";
+import { formatEther } from "ethers";
 
 interface Proof {
   claimData: {
@@ -21,6 +23,7 @@ interface SellerTicketVerifierQRProps {
 function SellerTicketVerifierQR({ onVerified, ticketId }: SellerTicketVerifierQRProps) {
   const [requestUrl, setRequestUrl] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const { bestBid, loading: bidLoading, error: bidError } = useBestBid(ticketId);
 
   const getVerificationReq = useCallback(async () => {
     try {
@@ -81,6 +84,24 @@ function SellerTicketVerifierQR({ onVerified, ticketId }: SellerTicketVerifierQR
   return (
     <div className="flex flex-col items-center justify-center p-6 bg-gray-50 rounded-lg border border-gray-200">
       <h2 className="text-xl font-semibold mb-4">Verify Ticket #{ticketId}</h2>
+      
+      {bidLoading ? (
+        <div className="flex items-center justify-center h-12 w-full mb-4">
+          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-green-600"></div>
+        </div>
+      ) : bidError ? (
+        <p className="text-red-500 mb-4">Error loading bid information</p>
+      ) : bestBid ? (
+        <div className="mb-6 p-4 bg-white rounded-lg shadow-sm w-full">
+          <p className="text-gray-700 mb-2">
+            <span className="font-semibold">Winner's Email:</span> {bestBid.email}
+          </p>
+          <p className="text-gray-700">
+            <span className="font-semibold">Amount to Receive:</span> {formatEther(bestBid.amount)} ETH
+          </p>
+        </div>
+      ) : null}
+
       <p className="text-gray-600 mb-6">Scan this QR code with your phone to verify your ticket details</p>
       
       {isLoading ? (
