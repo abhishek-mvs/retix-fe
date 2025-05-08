@@ -24,9 +24,9 @@ export default function EventPage({ id }: { id: number }) {
     setIsBidPopupOpen(false);
   };
 
-  const handleSubmitBid = async (amount: number) => {
+  const handleSubmitBid = async (amount: number, email: string) => {
     try {
-      await placeBid(id, amount);
+      await placeBid(id, amount, email);
       toast.success("Bid placed successfully!");
       handleCloseBidPopup();
     } catch (err) {

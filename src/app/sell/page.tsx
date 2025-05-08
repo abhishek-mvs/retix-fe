@@ -97,7 +97,7 @@ export default function SellPage() {
         
         const timestamp = Math.floor(date.getTime() / 1000);
         
-        const timestamp10MinsFromNow = Math.floor((Date.now() + 10 * 60 * 1000) / 1000);
+        const timestamp10MinsFromNow = Math.floor((Date.now() + 4 * 60 * 1000) / 1000);
         setActualEventTimestamp(timestamp10MinsFromNow);
         console.log('actualEventTimestamp', timestamp10MinsFromNow);
       }
