@@ -1,30 +1,53 @@
 "use client";
-import { Suspense } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Navbar from "@/components/navbar";
 import { Button } from "@/components/ui/button";
 import TicketCard from "@/components/ticket-card";
 import { useTickets } from "@/calls/get-tickets";
+import { useSmartWallets } from "@privy-io/react-auth/smart-wallets";
+import { CONTRACT_ADDRESS } from "@/data/constants";
+import { encodeFunctionData } from "viem";
+import ABI from "../../data/abi.json";
 
 export default function EventsPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
-          <p className="text-lg text-gray-600">Loading...</p>
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-white flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
+            <p className="text-lg text-gray-600">Loading...</p>
+          </div>
         </div>
-      </div>
-    }>
+      }
+    >
       <EventsContent />
     </Suspense>
   );
 }
 
 function EventsContent() {
-  const { tickets, loading, error } = useTickets();
+  const { client: smartWalletClient } = useSmartWallets();
+  // const { tickets, loading, error } = useTickets();
+  const [tickets, setTickets] = useState([]);
 
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>Error: {error}</p>;
+  useEffect(() => {
+    const getTickets = async () => {
+      if (!smartWalletClient) return;
+      const tx = await smartWalletClient.sendTransaction({
+        to: CONTRACT_ADDRESS,
+        data: encodeFunctionData({
+          abi: ABI,
+          functionName: "getAllTickets",
+          args: [],
+        }),
+      });
+    };
+    getTickets();
+  }, []);
+
+  // if (loading) return <p>Loading...</p>;
+  // if (error) return <p>Error: {error}</p>;
 
   return (
     <div className="min-h-screen bg-white">

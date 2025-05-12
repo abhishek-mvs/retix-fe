@@ -8,13 +8,6 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useListTicket } from "@/calls/list-ticket";
 import TicketVerfierQR from "@/components/ticket-verifier";
-// import {
-//   Select,
-//   SelectContent,
-//   SelectItem,
-//   SelectTrigger,
-//   SelectValue,
-// } from "@/components/ui/select";
 
 interface Proof {
   claimData: {
@@ -23,10 +16,7 @@ interface Proof {
 }
 
 export default function SellPage() {
-  const {
-    listTicket,
-    //  loading, error, txHash
-  } = useListTicket();
+  const { listTicket } = useListTicket();
   const [eventName, setEventName] = useState("");
   const [eventDate, setEventDate] = useState("");
   const [eventLocation, setEventLocation] = useState("");
@@ -35,7 +25,9 @@ export default function SellPage() {
   const [eventDetails, setEventDetails] = useState("");
   const [finalEstimate, setFinalEstimate] = useState<number | null>(null);
   const [isVerified, setIsVerified] = useState(false);
-  const [actualEventTimestamp, setActualEventTimestamp] = useState<number | null>(null);
+  const [actualEventTimestamp, setActualEventTimestamp] = useState<
+    number | null
+  >(null);
 
   useEffect(() => {
     function calculateFinalPrice(): number {
@@ -50,7 +42,6 @@ export default function SellPage() {
   }, [minBid]);
 
   const handleList = async () => {
-    console.log(eventDate);
     if (!eventDate || !actualEventTimestamp) return 0;
 
     // Subtract time from actual event for expiry values
@@ -85,24 +76,26 @@ export default function SellPage() {
       // Parse IST date string to epoch
       if (params.transactionDate) {
         // Format: MM/DD/YYYY HH:MM:SS
-        const [datePart, timePart] = params.transactionDate.split(' ');
-        const [month, day, year] = datePart.split('/').map(Number);
-        const [hours, minutes, seconds] = timePart.split(':').map(Number);
-        
+        const [datePart, timePart] = params.transactionDate.split(" ");
+        const [month, day, year] = datePart.split("/").map(Number);
+        const [hours, minutes, seconds] = timePart.split(":").map(Number);
+
         // Create date in IST (UTC+5:30)
-        const date = new Date(Date.UTC(year, month - 1, day, hours, minutes, seconds));
+        const date = new Date(
+          Date.UTC(year, month - 1, day, hours, minutes, seconds)
+        );
         // Adjust for IST (UTC+5:30)
         date.setHours(date.getHours() - 5);
         date.setMinutes(date.getMinutes() - 30);
-        
-        const timestamp = Math.floor(date.getTime() / 1000);
-        
-        const timestamp10MinsFromNow = Math.floor((Date.now() + 4 * 60 * 1000) / 1000);
+
+        const timestamp10MinsFromNow = Math.floor(
+          (Date.now() + 4 * 60 * 1000) / 1000
+        );
         setActualEventTimestamp(timestamp10MinsFromNow);
-        console.log('actualEventTimestamp', timestamp10MinsFromNow);
+        console.log("actualEventTimestamp", timestamp10MinsFromNow);
       }
     } catch (error) {
-      console.error('Error parsing proof data:', error);
+      console.error("Error parsing proof data:", error);
     }
   };
 
@@ -129,32 +122,76 @@ export default function SellPage() {
               <div className="grid md:grid-cols-3 gap-8">
                 <div className="md:col-span-2">
                   <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6">
-                    <h2 className="text-xl font-semibold mb-4">Event Details</h2>
+                    <h2 className="text-xl font-semibold mb-4">
+                      Event Details
+                    </h2>
 
                     <div className="space-y-4">
                       <div>
-                        <label htmlFor="event-name" className="block text-sm font-medium text-gray-700 mb-1">Event Name</label>
-                        <Input id="event-name" value={eventName} readOnly className="bg-gray-100" />
+                        <label
+                          htmlFor="event-name"
+                          className="block text-sm font-medium text-gray-700 mb-1"
+                        >
+                          Event Name
+                        </label>
+                        <Input
+                          id="event-name"
+                          value={eventName}
+                          readOnly
+                          className="bg-gray-100"
+                        />
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <label htmlFor="event-date" className="block text-sm font-medium text-gray-700 mb-1">Event Date</label>
-                          <Input id="event-date" value={eventDate} readOnly className="bg-gray-100" />
+                          <label
+                            htmlFor="event-date"
+                            className="block text-sm font-medium text-gray-700 mb-1"
+                          >
+                            Event Date
+                          </label>
+                          <Input
+                            id="event-date"
+                            value={eventDate}
+                            readOnly
+                            className="bg-gray-100"
+                          />
                         </div>
                       </div>
                       <div>
-                        <label htmlFor="event-location" className="block text-sm font-medium text-gray-700 mb-1">Event Location</label>
-                        <Input id="event-location" value={eventLocation} readOnly className="bg-gray-100" />
+                        <label
+                          htmlFor="event-location"
+                          className="block text-sm font-medium text-gray-700 mb-1"
+                        >
+                          Event Location
+                        </label>
+                        <Input
+                          id="event-location"
+                          value={eventLocation}
+                          readOnly
+                          className="bg-gray-100"
+                        />
                       </div>
                       <div>
-                        <label htmlFor="event-details" className="block text-sm font-medium text-gray-700 mb-1">Event Details</label>
-                        <Input id="event-details" value={eventDetails} readOnly className="bg-gray-100" />
+                        <label
+                          htmlFor="event-details"
+                          className="block text-sm font-medium text-gray-700 mb-1"
+                        >
+                          Event Details
+                        </label>
+                        <Input
+                          id="event-details"
+                          value={eventDetails}
+                          readOnly
+                          className="bg-gray-100"
+                        />
                       </div>
                     </div>
                   </div>
 
                   <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6">
-                    <h2 className="text-xl font-semibold mb-4">Ticket Details</h2>
+                    <h2 className="text-xl font-semibold mb-4">
+                      Ticket Details
+                    </h2>
 
                     <div className="space-y-4">
                       <div className="grid grid-cols-2 gap-4">
@@ -214,7 +251,9 @@ export default function SellPage() {
 
                 <div className="md:col-span-1">
                   <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 sticky top-6">
-                    <h2 className="text-xl font-semibold mb-4">Listing Summary</h2>
+                    <h2 className="text-xl font-semibold mb-4">
+                      Listing Summary
+                    </h2>
 
                     <div className="space-y-4">
                       <div className="flex justify-between">
@@ -230,9 +269,9 @@ export default function SellPage() {
                       <div className="bg-green-50 p-4 rounded-lg text-sm text-green-800 flex">
                         <Info className="h-5 w-5 mr-2 flex-shrink-0" />
                         <p>
-                          Your tickets will be listed immediately after submission
-                          and verification. You&apos;ll be paid once the tickets are
-                          sold.
+                          Your tickets will be listed immediately after
+                          submission and verification. You&apos;ll be paid once
+                          the tickets are sold.
                         </p>
                       </div>
 
