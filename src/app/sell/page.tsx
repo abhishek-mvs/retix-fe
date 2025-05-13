@@ -100,10 +100,10 @@ export default function SellPage() {
         // Adjust for IST (UTC+5:30)
         date.setHours(date.getHours() - 5);
         date.setMinutes(date.getMinutes() - 30);
-
-        const timestamp10MinsFromNow = Math.floor(
-          (Date.now() + 4 * 60 * 1000) / 1000
-        );
+        
+        const timestamp = Math.floor(date.getTime() / 1000);
+        
+        const timestamp10MinsFromNow = Math.floor((Date.now() + 60 * 60 * 1000) / 1000);
         setActualEventTimestamp(timestamp10MinsFromNow);
         console.log("actualEventTimestamp", timestamp10MinsFromNow);
       }

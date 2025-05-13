@@ -314,6 +314,11 @@
             "internalType": "bool",
             "name": "isHighestBidderFound",
             "type": "bool"
+          },
+          {
+            "internalType": "enum TicketMarketplace.TicketStatus",
+            "name": "status",
+            "type": "uint8"
           }
         ],
         "internalType": "struct TicketMarketplace.Ticket[]",
@@ -415,6 +420,11 @@
             "internalType": "bool",
             "name": "isHighestBidderFound",
             "type": "bool"
+          },
+          {
+            "internalType": "enum TicketMarketplace.TicketStatus",
+            "name": "status",
+            "type": "uint8"
           }
         ],
         "internalType": "struct TicketMarketplace.Ticket[]",
@@ -932,6 +942,11 @@
         "internalType": "bool",
         "name": "isHighestBidderFound",
         "type": "bool"
+      },
+      {
+        "internalType": "enum TicketMarketplace.TicketStatus",
+        "name": "status",
+        "type": "uint8"
       }
     ],
     "stateMutability": "view",

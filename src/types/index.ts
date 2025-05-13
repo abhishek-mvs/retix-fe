@@ -43,6 +43,7 @@ export type Ticket = {
   bidExpiryTime: number; // Timestamp in seconds (or bigint if needed)
   sellerExpiryTime: number;
   isHighestBidderFound: boolean;
+  status: bigint; // 0: active, 1: pending, 2: completed, 3: notSold
 };
 
 export type CreateTicketInput = {
@@ -61,4 +62,16 @@ export type Bid = {
   isAccepted: boolean;
 };
 
-export type TicketStatus = "available" | "sold" | "expired" | "refunded";
+export type TicketStatus = "active" | "pending" | "completed" | "notSold";
+
+export const TICKET_STATUS_MAP: Record<number, TicketStatus> = {
+  0: "active",
+  1: "pending",
+  2: "completed",
+  3: "notSold"
+} as const;
+
+// Helper function to convert BigInt status to string
+export const getTicketStatusString = (status: bigint): TicketStatus => {
+  return TICKET_STATUS_MAP[Number(status)] || "active";
+};

@@ -14,13 +14,11 @@ import { useState } from "react";
 import BidPopup from "@/components/bid-popup";
 import { useAddUserBid } from "@/calls/add-user-bid";
 import { toast } from "sonner";
+import { getTicketStatusString } from "@/types";
 import { useSmartWallets } from "@privy-io/react-auth/smart-wallets";
 
 export default function EventPage({ id }: { id: number }) {
   const { ticket } = useTicketById(id);
-  const { client: smartWalletClient } = useSmartWallets();
-
-  console.log({ smartWalletClient });
 
   const [isBidPopupOpen, setIsBidPopupOpen] = useState(false);
   const { placeBid, loading, error } = useAddUserBid();
@@ -48,6 +46,27 @@ export default function EventPage({ id }: { id: number }) {
   // Check if bidding is expired
   const now = Math.floor(Date.now() / 1000);
   const isExpired = Number(ticket.bidExpiryTime) < now;
+  const isActive = Number(ticket.status) === 0;
+  const isAvailableForBidding = isActive && !isExpired;
+
+  const getStatusMessage = () => {
+    if (!isActive) {
+      switch (Number(ticket.status)) {
+        case 1:
+          return "Ticket is pending verification";
+        case 2:
+          return "Ticket has been sold";
+        case 3:
+          return "Ticket is no longer available";
+        default:
+          return "Ticket is not available";
+      }
+    }
+    if (isExpired) {
+      return "Bidding time has expired";
+    }
+    return "";
+  };
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-50">
@@ -129,14 +148,16 @@ export default function EventPage({ id }: { id: number }) {
                   {formatTimeLeft(ticket.bidExpiryTime)}
                 </span>
               </div>
+              <div className="flex justify-between py-2">
+                <span className="text-gray-600 font-medium text-sm">Status:</span>
+                <span className="text-gray-800 text-sm">{getTicketStatusString(ticket.status)}</span>
+              </div>
             </div>
           </div>
 
           {/* Bid Button or Expired Message */}
           {isExpired ? (
-            <div className="w-full text-center py-2 text-base font-semibold text-red-600 bg-red-50 rounded-xl border border-red-200">
-              Bidding time is expired
-            </div>
+            <div className="w-full text-center py-2 text-base font-semibold text-red-600 bg-red-50 rounded-xl border border-red-200">Bidding time is expired</div>
           ) : (
             <Button
               className="w-full bg-green-600 hover:bg-green-700 text-white py-2 text-base font-semibold rounded-xl shadow transition-colors"

@@ -3,8 +3,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Calendar, Download, Share2, QrCode, MapPin } from "lucide-react";
 import Image from "next/image";
-import { Ticket } from "@/types";
-import { formatTimestamp, getIPFSUrl } from "@/utils/formatters";
+import { Ticket, getTicketStatusString } from "@/types";
+import { formatTimestamp, getIPFSUrl, formatUSDC } from "@/utils/formatters";
 import { useRouter } from "next/navigation";
 
 interface TicketCardProps {
@@ -17,6 +17,22 @@ export default function TicketCard({ ticket, type }: TicketCardProps) {
   const redirectToTicket = () => {
     router.push(`/events/${ticket.id}`);
   };
+
+  const getStatusColor = (status: bigint) => {
+    switch (Number(status)) {
+      case 0: // active
+        return "bg-green-100 text-green-800";
+      case 1: // pending
+        return "bg-yellow-100 text-yellow-800";
+      case 2: // completed
+        return "bg-blue-100 text-blue-800";
+      case 3: // notSold
+        return "bg-red-100 text-red-800";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
+  };
+
   return (
     <Card className="overflow-hidden" onClick={redirectToTicket}>
       <CardContent className="p-0">
@@ -49,23 +65,17 @@ export default function TicketCard({ ticket, type }: TicketCardProps) {
                 </div>
 
                 <div className="mt-4">
-                  {/* <p className="font-medium">{ticket.ticketType}</p>
-									<p className="text-gray-600">{ticket.seatInfo}</p>
-									{ticket.minBid && (
-										<p className="font-bold mt-2">{ticket.price}</p>
-									)} */}
-                  {/* {ticket.status && (
-										<div className="mt-2">
-											<span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-												{ticket.status}
-											</span>
-										</div>
-									)} */}
+                  <p className="font-medium">{formatUSDC(ticket.minBid)} USDC</p>
+                  <div className="mt-2">
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(ticket.status)}`}>
+                      {getTicketStatusString(ticket.status)}
+                    </span>
+                  </div>
                 </div>
               </div>
 
               <div className="flex flex-col gap-2">
-                {type === "upcoming" && (
+                {type === "upcoming" && Number(ticket.status) === 2 && (
                   <>
                     <Button className="flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white">
                       <QrCode className="h-4 w-4" />
@@ -88,7 +98,7 @@ export default function TicketCard({ ticket, type }: TicketCardProps) {
                   </>
                 )}
 
-                {type === "past" && (
+                {type === "past" && Number(ticket.status) === 2 && (
                   <Button
                     variant="outline"
                     className="flex items-center justify-center gap-2"
@@ -98,7 +108,7 @@ export default function TicketCard({ ticket, type }: TicketCardProps) {
                   </Button>
                 )}
 
-                {type === "selling" && (
+                {type === "selling" && Number(ticket.status) === 0 && (
                   <>
                     <Button
                       variant="outline"
@@ -113,6 +123,15 @@ export default function TicketCard({ ticket, type }: TicketCardProps) {
                       Remove Listing
                     </Button>
                   </>
+                )}
+
+                {type === "selling" && Number(ticket.status) === 1 && (
+                  <Button
+                    variant="outline"
+                    className="flex items-center justify-center gap-2"
+                  >
+                    Verify Ticket
+                  </Button>
                 )}
               </div>
             </div>

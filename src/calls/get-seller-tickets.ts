@@ -22,7 +22,7 @@ export const useSellerTickets = () => {
       const allTickets: Ticket[] = await contract.getSellerTickets(
         user?.wallet?.address
       );
-      console.log("allTickets", allTickets);
+      console.log("allSellerTickets", allTickets);
       setTickets(allTickets);
     } catch (err) {
       console.error(err);

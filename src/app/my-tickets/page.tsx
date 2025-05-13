@@ -10,6 +10,7 @@ import { formatTimeLeft } from "@/utils/formatters";
 import { Suspense } from "react";
 import SellerTicketVerifierQR from "@/components/seller-ticket-verifier";
 import { confirmTicketDelivery } from "@/calls/confirm-ticket-delivery";
+import { filterActiveTickets, filterPendingTickets, filterPastTickets } from "@/utils/ticket-filters";
 
 export default function MyTicketsPage() {
   return (
@@ -39,20 +40,13 @@ function MyTicketsContent() {
   };
 
   const handleVerificationComplete = async (proof: { claimData: { context: string } }) => {
-    if (!verifyingTicketId) return;
+    if (verifyingTicketId === null) return;
     
     try {
       setIsConfirming(true);
-      // Here you would typically send the proof to your backend/contract
-      console.log("Verification proof:", proof);
-      
-      // Call the contract to confirm ticket delivery
       await confirmTicketDelivery(verifyingTicketId);
-      
       toast.success("Ticket verified and delivery confirmed successfully!");
       setShowVerifier(false);
-      
-      // Refresh the tickets list to show updated status
       await refetch();
     } catch (error) {
       console.error(error);
@@ -63,14 +57,14 @@ function MyTicketsContent() {
     }
   };
 
-  const isBiddingPeriodEnded = (ticket: Ticket) => {
-    return Date.now() / 1000 > ticket.bidExpiryTime;
-  };
-
-  // Filter tickets into different categories
-  const activeTickets = tickets.filter(ticket => !isBiddingPeriodEnded(ticket) && !ticket.sold);
-  const pendingTickets = tickets.filter(ticket => isBiddingPeriodEnded(ticket) && !ticket.sold);
-  const pastTickets = tickets.filter(ticket => ticket.sold);
+  // Filter tickets using the new status system
+  console.log("tickets", tickets);
+  for (const ticket of tickets) {
+    console.log("ticket", ticket.status);
+  }
+  const activeTickets = filterActiveTickets(tickets);
+  const pendingTickets = filterPendingTickets(tickets);
+  const pastTickets = filterPastTickets(tickets);
 
   if (loading) return (
     <div className="min-h-screen bg-white flex items-center justify-center">
@@ -101,7 +95,7 @@ function MyTicketsContent() {
         <Navbar />
 
         {/* Verification Modal */}
-        {showVerifier && verifyingTicketId && (
+        {showVerifier && verifyingTicketId !== null && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
               {isConfirming ? (
@@ -191,12 +185,9 @@ function MyTicketsContent() {
                 <div className="grid gap-6">
                   {activeTickets.map((ticket) => (
                     <div key={ticket.id} className="border rounded-lg p-4">
-                      <TicketCard ticket={ticket} type="upcoming" />
+                      <TicketCard ticket={ticket} type="selling" />
                       <div className="mt-4 flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <span className="px-2 py-1 rounded text-sm bg-yellow-100 text-yellow-800">
-                            Bidding Active
-                          </span>
                           <span className="text-sm text-gray-600">
                             Expires in {formatTimeLeft(ticket.bidExpiryTime)}
                           </span>
@@ -218,12 +209,9 @@ function MyTicketsContent() {
                 <div className="grid gap-6">
                   {pendingTickets.map((ticket) => (
                     <div key={ticket.id} className="border rounded-lg p-4">
-                      <TicketCard ticket={ticket} type="upcoming" />
+                      <TicketCard ticket={ticket} type="selling" />
                       <div className="mt-4 flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <span className="px-2 py-1 rounded text-sm bg-blue-100 text-blue-800">
-                            Pending Verification
-                          </span>
                           <span className="text-sm text-gray-600">
                             Verify within {formatTimeLeft(ticket.sellerExpiryTime)}
                           </span>
@@ -252,14 +240,7 @@ function MyTicketsContent() {
                 <div className="grid gap-6">
                   {pastTickets.map((ticket) => (
                     <div key={ticket.id} className="border rounded-lg p-4">
-                      <TicketCard ticket={ticket} type="past" />
-                      <div className="mt-4 flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <span className="px-2 py-1 rounded text-sm bg-green-100 text-green-800">
-                            Sold
-                          </span>
-                        </div>
-                      </div>
+                      <TicketCard ticket={ticket} type="selling" />
                     </div>
                   ))}
                 </div>
@@ -274,14 +255,8 @@ function MyTicketsContent() {
 
 function EmptyState({ message }: { message: string }) {
   return (
-    <div className="text-center py-12 bg-gray-50 rounded-lg">
-      <h3 className="text-lg font-medium text-gray-900 mb-2">{message}</h3>
-      <p className="text-gray-500 mb-6">
-        Tickets will appear here when available
-      </p>
-      <Button className="bg-green-600 hover:bg-green-700 text-white">
-        Browse Events
-      </Button>
+    <div className="text-center py-12">
+      <p className="text-gray-500">{message}</p>
     </div>
   );
 }
