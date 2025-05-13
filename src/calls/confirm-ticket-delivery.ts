@@ -1,17 +1,27 @@
-import { BrowserProvider, Contract } from "ethers";
+import { Contract } from "ethers";
 import ABI from "../data/abi.json";
 import { CONTRACT_ADDRESS } from "@/data/constants";
+import { useSmartWallets } from "@privy-io/react-auth/smart-wallets";
+import { encodeFunctionData } from "viem";
 
-export const confirmTicketDelivery = async (ticketId: number) => {
-  if (!window.ethereum) throw new Error("No wallet found");
+type SmartWalletClient = ReturnType<typeof useSmartWallets>['client'];
 
-  const provider = new BrowserProvider(window.ethereum);
-  const signer = await provider.getSigner();
-  const contract = new Contract(CONTRACT_ADDRESS, ABI, signer);
+export const confirmTicketDelivery = async (
+  ticketId: number,
+  smartWalletClient: SmartWalletClient
+) => {
+  if (!smartWalletClient) throw new Error("No Smart Wallet");
 
   try {
-    const tx = await contract.confirmTicketDelivery(ticketId, true);
-    await tx.wait();
+    const tx = await smartWalletClient.sendTransaction({
+      to: CONTRACT_ADDRESS,
+      data: encodeFunctionData({
+        abi: ABI,
+        functionName: "confirmTicketDelivery",
+        args: [BigInt(ticketId), true],
+      }),
+    });
+
     return true;
   } catch (error) {
     console.error("Error confirming ticket delivery:", error);

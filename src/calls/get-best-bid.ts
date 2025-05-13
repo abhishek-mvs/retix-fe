@@ -1,7 +1,8 @@
 import { useEffect, useState, useCallback } from "react";
-import { BrowserProvider, Contract } from "ethers";
+import { Contract, JsonRpcProvider } from "ethers";
 import ABI from "../data/abi.json";
-import { CONTRACT_ADDRESS } from "@/data/constants";
+import { CONTRACT_ADDRESS, RPC } from "@/data/constants";
+import { useSmartWallets } from "@privy-io/react-auth/smart-wallets";
 
 interface BestBid {
   email: string;
@@ -12,18 +13,17 @@ export const useBestBid = (ticketId: number | string) => {
   const [bestBid, setBestBid] = useState<BestBid | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { client: smartWalletClient } = useSmartWallets();
 
   const fetchBestBid = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
 
-      if (!window.ethereum) throw new Error("No wallet found");
+      if (!smartWalletClient) throw new Error("No Smart Wallet");
 
-      const provider = new BrowserProvider(window.ethereum);
-      const signer = await provider.getSigner();
-      const contract = new Contract(CONTRACT_ADDRESS, ABI, signer);
-
+      const provider = new JsonRpcProvider(RPC);
+      const contract = new Contract(CONTRACT_ADDRESS, ABI, provider);
       const [email, amount] = await contract.getTheBestBid(ticketId);
       setBestBid({ email, amount });
     } catch (err) {
@@ -32,7 +32,7 @@ export const useBestBid = (ticketId: number | string) => {
     } finally {
       setLoading(false);
     }
-  }, [ticketId]);
+  }, [ticketId, smartWalletClient]);
 
   useEffect(() => {
     if (ticketId !== undefined && ticketId !== null) {

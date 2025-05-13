@@ -11,6 +11,7 @@ import { Suspense } from "react";
 import SellerTicketVerifierQR from "@/components/seller-ticket-verifier";
 import { confirmTicketDelivery } from "@/calls/confirm-ticket-delivery";
 import { filterActiveTickets, filterPendingTickets, filterPastTickets } from "@/utils/ticket-filters";
+import { useSmartWallets } from "@privy-io/react-auth/smart-wallets";
 
 export default function MyTicketsPage() {
   return (
@@ -33,6 +34,7 @@ function MyTicketsContent() {
   const [activeTab, setActiveTab] = useState<'active' | 'pending' | 'past'>('active');
   const [showVerifier, setShowVerifier] = useState(false);
   const [isConfirming, setIsConfirming] = useState(false);
+  const { client: smartWalletClient } = useSmartWallets();
 
   const handleVerifyTicket = async (ticketId: number) => {
     setVerifyingTicketId(ticketId);
@@ -40,11 +42,11 @@ function MyTicketsContent() {
   };
 
   const handleVerificationComplete = async (proof: { claimData: { context: string } }) => {
-    if (verifyingTicketId === null) return;
+    if (verifyingTicketId === null || !smartWalletClient) return;
     
     try {
       setIsConfirming(true);
-      await confirmTicketDelivery(verifyingTicketId);
+      await confirmTicketDelivery(verifyingTicketId, smartWalletClient);
       toast.success("Ticket verified and delivery confirmed successfully!");
       setShowVerifier(false);
       await refetch();

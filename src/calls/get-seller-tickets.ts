@@ -15,12 +15,12 @@ export const useSellerTickets = () => {
     try {
       setLoading(true);
       setError(null);
-
+      console.log("user", user);
       const provider = new JsonRpcProvider(RPC);
       const contract = new Contract(CONTRACT_ADDRESS, ABI, provider);
 
       const allTickets: Ticket[] = await contract.getSellerTickets(
-        user?.wallet?.address
+        user?.smartWallet?.address
       );
       console.log("allSellerTickets", allTickets);
       setTickets(allTickets);
