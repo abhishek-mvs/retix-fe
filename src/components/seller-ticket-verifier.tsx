@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import QRCode from "react-qr-code";
-import { ReclaimProofRequest } from "@reclaimprotocol/js-sdk";
+import { ReclaimProofRequest, Proof } from "@reclaimprotocol/js-sdk";
 import {
   TICKET_VERIFIER_PROVIDER_ID,
   RECLAIM_APP_ID,
@@ -8,12 +8,7 @@ import {
 } from "@/data/constants";
 import { useBestBid } from "@/calls/get-best-bid";
 import { formatEther } from "ethers";
-
-interface Proof {
-  claimData: {
-    context: string;
-  };
-}
+import { verifySellerTicketEmail } from "@/calls/verify-seller-ticket-email";
 
 interface SellerTicketVerifierQRProps {
   onVerified?: (proof: Proof) => void;
@@ -33,14 +28,28 @@ function SellerTicketVerifierQR({ onVerified, ticketId }: SellerTicketVerifierQR
   const [requestUrl, setRequestUrl] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [verificationProof, setVerificationProof] = useState<Proof | null>(null);
+  const [verificationStatus, setVerificationStatus] = useState<{
+    isValid: boolean;
+    message: string;
+  } | null>(null);
   const { bestBid, loading: bidLoading, error: bidError } = useBestBid(ticketId);
 
   // Handle verification proof updates
   useEffect(() => {
-    if (verificationProof && onVerified) {
-      onVerified(verificationProof);
+    if (verificationProof && bestBid) {
+      const isValid = verifySellerTicketEmail(verificationProof, bestBid);
+      setVerificationStatus({
+        isValid,
+        message: isValid 
+          ? "Email verification successful!" 
+          : "Email verification failed: Email address does not match the winner's email"
+      });
+      
+      if (isValid && onVerified) {
+        onVerified(verificationProof);
+      }
     }
-  }, [verificationProof, onVerified]);
+  }, [verificationProof, bestBid, onVerified]);
 
   const getVerificationReq = useCallback(async () => {
     try {
@@ -94,6 +103,12 @@ function SellerTicketVerifierQR({ onVerified, ticketId }: SellerTicketVerifierQR
     getVerificationReq();
   }, [getVerificationReq]);
 
+  const handleRetry = useCallback(() => {
+    setVerificationProof(null);
+    setVerificationStatus(null);
+    getVerificationReq();
+  }, [getVerificationReq]);
+
   return (
     <div className="flex flex-col items-center justify-center p-6 bg-gray-50 rounded-lg border border-gray-200">
       <h2 className="text-xl font-semibold mb-4">Verify Ticket #{ticketId}</h2>
@@ -115,31 +130,51 @@ function SellerTicketVerifierQR({ onVerified, ticketId }: SellerTicketVerifierQR
         </div>
       ) : null}
 
-      <p className="text-gray-600 mb-6">Scan this QR code with your phone to verify your ticket details</p>
-      
-      {isLoading ? (
-        <div className="flex items-center justify-center h-64 w-full">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
+      {verificationStatus && (
+        <div className={`mt-4 p-4 rounded-lg ${
+          verificationStatus.isValid ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+        }`}>
+          {verificationStatus.message}
+          {!verificationStatus.isValid && (
+            <button
+              onClick={handleRetry}
+              className="mt-2 w-full px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+            >
+              Try Again
+            </button>
+          )}
         </div>
-      ) : requestUrl ? (
+      )}
+
+      {!verificationStatus && (
         <>
-          <div className="mb-6 p-4 bg-white rounded-lg shadow-sm">
-            <QRCode value={requestUrl} size={256} />
-          </div>
-          <p className="text-gray-600 mb-2">Or use this link to verify your ticket:</p>
-          <a 
-            href={requestUrl} 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="text-green-600 hover:text-green-800 underline font-medium"
-          >
-            Verify Ticket
-          </a>
+          <p className="text-gray-600 mb-6">Scan this QR code with your phone to verify your ticket details</p>
+          
+          {isLoading ? (
+            <div className="flex items-center justify-center h-64 w-full">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
+            </div>
+          ) : requestUrl ? (
+            <>
+              <div className="mb-6 p-4 bg-white rounded-lg shadow-sm">
+                <QRCode value={requestUrl} size={256} />
+              </div>
+              <p className="text-gray-600 mb-2">Or use this link to verify your ticket:</p>
+              <a 
+                href={requestUrl} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-green-600 hover:text-green-800 underline font-medium"
+              >
+                Verify Ticket
+              </a>
+            </>
+          ) : (
+            <div className="flex items-center justify-center h-64 w-full">
+              <p className="text-red-500">Failed to generate verification QR code</p>
+            </div>
+          )}
         </>
-      ) : (
-        <div className="flex items-center justify-center h-64 w-full">
-          <p className="text-red-500">Failed to generate verification QR code</p>
-        </div>
       )}
     </div>
   );
