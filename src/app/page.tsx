@@ -24,7 +24,7 @@ export default function Home() {
         <div className="my-8">
           <EventBanner
             title="Manchester City"
-            imageUrl="/placeholder.svg?height=400&width=800"
+            imageUrl="/images/football.webp"
             logoUrl="/man_city.png"
             buttonText="See Tickets"
             likes="1.3k"

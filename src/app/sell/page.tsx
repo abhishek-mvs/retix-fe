@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useListTicket } from "@/calls/list-ticket";
 import TicketVerfierQR from "@/components/ticket-verifier";
+import Image from "next/image.js";
 
 interface Proof {
   claimData: {
@@ -20,7 +21,6 @@ export default function SellPage() {
   const [eventName, setEventName] = useState("");
   const [eventDate, setEventDate] = useState("");
   const [eventLocation, setEventLocation] = useState("");
-  const [ticketImage, setTicketImage] = useState("");
   const [minBid, setMinBid] = useState("");
   const [eventDetails, setEventDetails] = useState("");
   const [finalEstimate, setFinalEstimate] = useState<number | null>(null);
@@ -28,6 +28,18 @@ export default function SellPage() {
   const [actualEventTimestamp, setActualEventTimestamp] = useState<
     number | null
   >(null);
+
+  const [ticketImage, setTicketImage] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      const file = files[0];
+      setTicketImage(file);
+      setPreviewUrl(URL.createObjectURL(file)); // Create a preview URL
+    }
+  };
 
   useEffect(() => {
     function calculateFinalPrice(): number {
@@ -55,7 +67,8 @@ export default function SellPage() {
       eventName,
       eventDate: actualEventTimestamp,
       eventLocation,
-      ticketImage,
+      ticketImage:
+        "https://assets-in.bmscdn.com/iedb/movies/images/mobile/listing/medium/raid-2-et00382745-1742820522.jpg",
       sellerFID: 0,
       minBid: parseInt(minBid),
       bidExpiry,
@@ -156,21 +169,22 @@ export default function SellPage() {
                             className="bg-gray-100"
                           />
                         </div>
+                        <div>
+                          <label
+                            htmlFor="event-location"
+                            className="block text-sm font-medium text-gray-700 mb-1"
+                          >
+                            Event Location
+                          </label>
+                          <Input
+                            id="event-location"
+                            value={eventLocation}
+                            readOnly
+                            className="bg-gray-100"
+                          />
+                        </div>
                       </div>
-                      <div>
-                        <label
-                          htmlFor="event-location"
-                          className="block text-sm font-medium text-gray-700 mb-1"
-                        >
-                          Event Location
-                        </label>
-                        <Input
-                          id="event-location"
-                          value={eventLocation}
-                          readOnly
-                          className="bg-gray-100"
-                        />
-                      </div>
+
                       <div>
                         <label
                           htmlFor="event-details"
@@ -200,7 +214,7 @@ export default function SellPage() {
                             htmlFor="price"
                             className="block text-sm font-medium text-gray-700 mb-1"
                           >
-                            Min Bid ($)
+                            Price ($)
                           </label>
                           <div className="relative">
                             <Tag className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
@@ -208,7 +222,7 @@ export default function SellPage() {
                               id="price"
                               type="number"
                               min="0"
-                              step="0.01"
+                              // step="0.01"
                               placeholder="0.00"
                               className="pl-10"
                               onChange={(e) => setMinBid(e.target.value)}
@@ -231,19 +245,68 @@ export default function SellPage() {
                           onChange={(e) => setEventDetails(e.target.value)}
                         />
                       </div>
-                      <div>
+                      <div className="mb-4">
                         <label
-                          htmlFor="image"
+                          htmlFor="ticketImage"
                           className="block text-sm font-medium text-gray-700 mb-1"
                         >
-                          Ticket Image URI
+                          Ticket Image Upload
                         </label>
-                        <Input
-                          id="image"
-                          type="text"
-                          placeholder="Image URI"
-                          onChange={(e) => setTicketImage(e.target.value)}
+
+                        <div
+                          className="w-full h-32 border-2 border-dashed border-gray-300 rounded-md flex flex-col items-center justify-center cursor-pointer hover:border-gray-400 bg-gray-50"
+                          onClick={() =>
+                            document.getElementById("ticketImageInput")?.click()
+                          }
+                        >
+                          <svg
+                            className="h-6 w-6 text-gray-400 mb-1"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1M12 12v9m0 0l-3-3m3 3l3-3M16 7h-1a4 4 0 00-8 0H6a2 2 0 00-2 2v2h16V9a2 2 0 00-2-2z"
+                            />
+                          </svg>
+                          <p className="text-sm text-gray-500">
+                            Upload Ticket Image
+                          </p>
+                          <p className="text-xs text-gray-400">
+                            (png, jpeg, pdf and more)
+                          </p>
+                        </div>
+
+                        <input
+                          type="file"
+                          id="ticketImageInput"
+                          className="hidden"
+                          accept="image/*,.pdf"
+                          onChange={handleImageChange}
                         />
+
+                        {/* 🔽 Show preview if available and not a PDF */}
+                        {previewUrl &&
+                          !ticketImage?.name.toLowerCase().endsWith(".pdf") && (
+                            <Image
+                              src={previewUrl}
+                              alt="Ticket Preview"
+                              className="mt-2 w-full max-h-64 object-contain rounded border"
+                              width={100}
+                              height={100}
+                            />
+                          )}
+
+                        {/* If it's a PDF, show a file name */}
+                        {ticketImage?.name.toLowerCase().endsWith(".pdf") && (
+                          <p className="mt-2 text-sm text-gray-600">
+                            Selected PDF: {ticketImage.name}
+                          </p>
+                        )}
                       </div>
                     </div>
                   </div>

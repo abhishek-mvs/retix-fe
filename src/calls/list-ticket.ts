@@ -78,7 +78,7 @@ export function useListTicket() {
         to: CONTRACT_ADDRESS,
         data: encodeFunctionData({
           abi: ABI,
-          functionName: "register",
+          functionName: "listTicket",
           args: [
             eventDetails,
             eventName,
