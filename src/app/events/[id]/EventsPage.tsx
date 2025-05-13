@@ -15,13 +15,12 @@ import BidPopup from "@/components/bid-popup";
 import { useAddUserBid } from "@/calls/add-user-bid";
 import { toast } from "sonner";
 import { getTicketStatusString } from "@/types";
-import { useSmartWallets } from "@privy-io/react-auth/smart-wallets";
 
 export default function EventPage({ id }: { id: number }) {
   const { ticket } = useTicketById(id);
 
   const [isBidPopupOpen, setIsBidPopupOpen] = useState(false);
-  const { placeBid, loading, error } = useAddUserBid();
+  const { placeBid, error } = useAddUserBid();
 
   const handleOpenBidPopup = () => {
     setIsBidPopupOpen(true);
@@ -149,15 +148,21 @@ export default function EventPage({ id }: { id: number }) {
                 </span>
               </div>
               <div className="flex justify-between py-2">
-                <span className="text-gray-600 font-medium text-sm">Status:</span>
-                <span className="text-gray-800 text-sm">{getTicketStatusString(ticket.status)}</span>
+                <span className="text-gray-600 font-medium text-sm">
+                  Status:
+                </span>
+                <span className="text-gray-800 text-sm">
+                  {getTicketStatusString(ticket.status)}
+                </span>
               </div>
             </div>
           </div>
 
           {/* Bid Button or Expired Message */}
           {isExpired ? (
-            <div className="w-full text-center py-2 text-base font-semibold text-red-600 bg-red-50 rounded-xl border border-red-200">Bidding time is expired</div>
+            <div className="w-full text-center py-2 text-base font-semibold text-red-600 bg-red-50 rounded-xl border border-red-200">
+              Bidding time is expired
+            </div>
           ) : (
             <Button
               className="w-full bg-green-600 hover:bg-green-700 text-white py-2 text-base font-semibold rounded-xl shadow transition-colors"

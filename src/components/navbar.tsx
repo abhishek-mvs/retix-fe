@@ -1,3 +1,4 @@
+"use client";
 import type React from "react";
 import Link from "next/link";
 import Image from "next/image";
@@ -34,22 +35,22 @@ export default function Navbar() {
       try {
         const publicClient = createPublicClient({
           chain: baseSepolia,
-          transport: http()
+          transport: http(),
         });
 
         // Fetch ETH balance
         const ethBalanceWei = await publicClient.getBalance({
-          address: user.smartWallet.address as `0x${string}`
+          address: user.smartWallet.address as `0x${string}`,
         });
         setEthBalance(ethers.formatEther(ethBalanceWei));
 
         // Fetch USDC balance
-        const usdcBalanceWei = await publicClient.readContract({
+        const usdcBalanceWei = (await publicClient.readContract({
           address: MOCK_USDC_ADDRESS as `0x${string}`,
           abi: USDC_ABI,
-          functionName: 'balanceOf',
-          args: [user.smartWallet.address]
-        }) as bigint;
+          functionName: "balanceOf",
+          args: [user.smartWallet.address],
+        })) as bigint;
         setUsdcBalance(ethers.formatEther(usdcBalanceWei));
       } catch (error) {
         console.error("Error fetching balances:", error);
@@ -115,20 +116,32 @@ export default function Navbar() {
                   <div className="px-2 py-1.5 text-sm text-gray-500">
                     Smart Wallet
                   </div>
-                  <DropdownMenuItem className="flex items-center gap-2 cursor-pointer" onClick={copyAddress}>
+                  <DropdownMenuItem
+                    className="flex items-center gap-2 cursor-pointer"
+                    onClick={copyAddress}
+                  >
                     <span className="text-xs font-mono">
-                      {user.smartWallet.address.slice(0, 6)}...{user.smartWallet.address.slice(-4)}
+                      {user.smartWallet.address.slice(0, 6)}...
+                      {user.smartWallet.address.slice(-4)}
                     </span>
                     <Copy className="h-4 w-4" />
                   </DropdownMenuItem>
                   <div className="px-2 py-1.5">
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-gray-500">ETH Balance:</span>
-                      <span className="font-mono">{isLoading ? "..." : `${parseFloat(ethBalance).toFixed(4)} ETH`}</span>
+                      <span className="font-mono">
+                        {isLoading
+                          ? "..."
+                          : `${parseFloat(ethBalance).toFixed(4)} ETH`}
+                      </span>
                     </div>
                     <div className="flex items-center justify-between text-sm mt-1">
                       <span className="text-gray-500">USDC Balance:</span>
-                      <span className="font-mono">{isLoading ? "..." : `${parseFloat(usdcBalance).toFixed(2)} USDC`}</span>
+                      <span className="font-mono">
+                        {isLoading
+                          ? "..."
+                          : `${parseFloat(usdcBalance).toFixed(2)} USDC`}
+                      </span>
                     </div>
                   </div>
                   <DropdownMenuSeparator />
