@@ -71,7 +71,7 @@ export function useListTicket() {
 
       if (!window.ethereum) throw new Error("Wallet not detected");
       if (!smartWalletClient) throw new Error("No Smart Wallet");
-
+      console.log("smartWalletClient", smartWalletClient);
       validateInputs({ eventDate, bidExpiry, sellerExpiryTime, minBid });
 
       const tx = await smartWalletClient.sendTransaction({

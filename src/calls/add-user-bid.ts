@@ -3,28 +3,111 @@ import { ethers } from "ethers";
 import { CONTRACT_ADDRESS, MOCK_USDC_ADDRESS } from "@/data/constants";
 import ABI from "../data/abi.json";
 import USDC_ABI from "../data/usdcERC20.json";
+import { useSmartWallets } from "@privy-io/react-auth/smart-wallets";
+import { encodeFunctionData } from "viem";
+import { usePrivy } from "@privy-io/react-auth";
+import { createPublicClient, http } from "viem";
+import { baseSepolia } from "wagmi/chains";
+import { toast } from "sonner";
+
+const MAX_RETRIES = 3;
+const RETRY_DELAY = 2000; // 2 seconds
+
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export function useAddUserBid() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [txHash, setTxHash] = useState<string | null>(null);
+  const { client: smartWalletClient } = useSmartWallets();
+  const { user } = usePrivy();
 
-  const checkAndApproveAllowance = async (signer: ethers.Signer, bidAmount: number) => {
-    const usdcContract = new ethers.Contract(MOCK_USDC_ADDRESS, USDC_ABI, signer);
-    const signerAddress = await signer.getAddress();
-    
-    // Check current allowance
-    const currentAllowance = await usdcContract.allowance(signerAddress, CONTRACT_ADDRESS);
-    console.log("bidAmount", bidAmount.toString());
+  const checkUSDCBalance = async (requiredAmount: bigint) => {
+    if (!user?.smartWallet?.address) throw new Error("No wallet address found");
+
+    const publicClient = createPublicClient({
+      chain: baseSepolia,
+      transport: http()
+    });
+
+    const balance = await publicClient.readContract({
+      address: MOCK_USDC_ADDRESS as `0x${string}`,
+      abi: USDC_ABI,
+      functionName: 'balanceOf',
+      args: [user.smartWallet.address]
+    }) as bigint;
+
+    console.log("USDC Balance:", ethers.formatEther(balance));
+    console.log("Required Amount:", ethers.formatEther(requiredAmount));
+
+    if (balance < requiredAmount) {
+      throw new Error(`Insufficient USDC balance. You need ${ethers.formatEther(requiredAmount)} USDC but have ${ethers.formatEther(balance)} USDC.`);
+    }
+
+    return balance;
+  };
+
+  const checkAndApproveAllowance = async (bidAmount: number) => {
+    if (!smartWalletClient) throw new Error("No Smart Wallet");
+    if (!user?.smartWallet?.address) throw new Error("No wallet address found");
+
     const bidAmountWei = ethers.parseEther(bidAmount.toString());
-    console.log("currentAllowance", currentAllowance);
-    console.log("bidAmountWei", bidAmountWei);
+    
+    // Check USDC balance first
+    await checkUSDCBalance(bidAmountWei);
+    
+    // Create a public client for read operations
+    const publicClient = createPublicClient({
+      chain: baseSepolia,
+      transport: http()
+    });
+
+    // Check current allowance using public client
+    const currentAllowance = await publicClient.readContract({
+      address: MOCK_USDC_ADDRESS as `0x${string}`,
+      abi: USDC_ABI,
+      functionName: 'allowance',
+      args: [user.smartWallet.address, CONTRACT_ADDRESS]
+    }) as bigint;
+
+    console.log("Current allowance:", currentAllowance.toString());
+    console.log("Required amount:", bidAmountWei.toString());
+
     // If current allowance is less than bid amount, request approval
     if (currentAllowance < bidAmountWei) {
       console.log("Requesting USDC approval...");
-      const approveTx = await usdcContract.approve(CONTRACT_ADDRESS, bidAmountWei);
-      await approveTx.wait();
-      console.log("USDC approval successful");
+      const approveData = encodeFunctionData({
+        abi: USDC_ABI,
+        functionName: "approve",
+        args: [CONTRACT_ADDRESS, bidAmountWei],
+      });
+
+      let retries = 0;
+      while (retries < MAX_RETRIES) {
+        try {
+          const approveTx = await smartWalletClient.sendTransaction({
+            to: MOCK_USDC_ADDRESS,
+            data: approveData,
+          });
+
+          console.log("USDC approval transaction:", approveTx);
+          toast.success("USDC approval successful!");
+          
+          // Wait for a few blocks to ensure the approval is processed
+          await sleep(5000);
+          return;
+        } catch (error) {
+          retries++;
+          console.error(`Approval attempt ${retries} failed:`, error);
+          
+          if (retries === MAX_RETRIES) {
+            throw new Error("Failed to approve USDC after multiple attempts. Please try again later.");
+          }
+          
+          // Wait before retrying
+          await sleep(RETRY_DELAY);
+        }
+      }
     }
   };
 
@@ -37,75 +120,72 @@ export function useAddUserBid() {
       console.log("email", email);
       const bidAmountWei = ethers.parseEther(bidAmount.toString());
       console.log("bidAmountWei", bidAmountWei);
-      if (!window.ethereum) throw new Error("Wallet not detected");
 
-      const provider = new ethers.BrowserProvider(window.ethereum);
-      const signer = await provider.getSigner();
-      const contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
+      if (!smartWalletClient) throw new Error("No Smart Wallet");
 
       // Check and request USDC approval if needed
-      await checkAndApproveAllowance(signer, bidAmount);
+      await checkAndApproveAllowance(bidAmount);
 
-      try {
-        // Simulate the transaction first
-        await contract.placeBid.staticCall(
-          BigInt(ticketId),
-          bidAmountWei,
-          email,
-          { gasLimit: 3000000 }
-        );
+      let retries = 0;
+      while (retries < MAX_RETRIES) {
+        try {
+          // Simulate the transaction first
+          const simulateData = encodeFunctionData({
+            abi: ABI,
+            functionName: "placeBid",
+            args: [BigInt(ticketId), bidAmountWei, email],
+          });
 
-        console.log("Simulation successful, proceeding with transaction");
-      } catch (error: unknown) {
-        const simError = error as Error;
-        console.error("Simulation failed:", simError);
-        if (simError.message) {
-          if (simError.message.includes("execution reverted")) {
-            const match = simError.message.match(/reason="([^"]+)"/);
-            if (match && match[1]) {
-              throw new Error(`Contract would reject this transaction: ${match[1]}`);
+          await smartWalletClient.sendTransaction({
+            to: CONTRACT_ADDRESS,
+            data: simulateData,
+          });
+
+          console.log("Simulation successful, proceeding with transaction");
+
+          // If simulation passes, send the actual transaction
+          const txData = encodeFunctionData({
+            abi: ABI,
+            functionName: "placeBid",
+            args: [BigInt(ticketId), bidAmountWei, email],
+          });
+
+          const tx = await smartWalletClient.sendTransaction({
+            to: CONTRACT_ADDRESS,
+            data: txData,
+          });
+
+          console.log("Transaction sent:", tx);
+          setTxHash(tx);
+          toast.success("Bid placed successfully!");
+          return tx;
+        } catch (error: unknown) {
+          retries++;
+          console.error(`Bid attempt ${retries} failed:`, error);
+          
+          if (retries === MAX_RETRIES) {
+            const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
+            if (errorMessage.includes("pimlico")) {
+              throw new Error("Network is currently busy. Please try again in a few minutes.");
+            } else if (errorMessage.includes("insufficient funds")) {
+              throw new Error("Insufficient funds in your smart wallet. Please add more ETH for gas fees.");
+            } else if (errorMessage.includes("transfer amount exceeds balance")) {
+              throw new Error("Insufficient USDC balance. Please add more USDC to your smart wallet.");
+            } else {
+              throw new Error(`Failed to place bid: ${errorMessage}`);
             }
           }
-        }
-        throw new Error("Transaction would fail: " + simError.message);
-      }
-
-      // If simulation passes, send the actual transaction
-      const tx = await contract.placeBid(
-        BigInt(ticketId),
-        bidAmountWei,
-        email,
-        { gasLimit: 3000000 }
-      );
-
-      console.log("Transaction sent:", tx.hash);
-      const receipt = await tx.wait();
-
-      if (receipt.status === 0) {
-        throw new Error("Transaction failed on-chain. Check explorer for details.");
-      }
-
-      console.log("Transaction confirmed:", receipt);
-      setTxHash(receipt.hash);
-      return receipt;
-    } catch (err) {
-      let errorMessage = (err as Error).message;
-
-      if (errorMessage.includes("user rejected")) {
-        errorMessage = "Transaction was rejected by the user";
-      } else if (errorMessage.includes("insufficient funds")) {
-        errorMessage = "Insufficient funds for gas * price + value";
-      } else if (errorMessage.includes("execution reverted")) {
-        const match = errorMessage.match(/reason="([^"]+)"/);
-        if (match && match[1]) {
-          errorMessage = `Contract error: ${match[1]}`;
-        } else {
-          errorMessage = "Transaction failed: Contract execution reverted";
+          
+          // Wait before retrying
+          await sleep(RETRY_DELAY);
         }
       }
-
+    } catch (error) {
+      console.error("Error placing bid:", error);
+      const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
       setError(errorMessage);
-      throw err;
+      toast.error(errorMessage);
+      throw error;
     } finally {
       setLoading(false);
     }
