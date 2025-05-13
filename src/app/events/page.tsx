@@ -1,13 +1,9 @@
 "use client";
-import { Suspense, useEffect, useState } from "react";
+import { Suspense } from "react";
 import Navbar from "@/components/navbar";
 import { Button } from "@/components/ui/button";
 import TicketCard from "@/components/ticket-card";
 import { useTickets } from "@/calls/get-tickets";
-import { useSmartWallets } from "@privy-io/react-auth/smart-wallets";
-import { CONTRACT_ADDRESS } from "@/data/constants";
-import { encodeFunctionData } from "viem";
-import ABI from "../../data/abi.json";
 
 export default function EventsPage() {
   return (
@@ -27,27 +23,10 @@ export default function EventsPage() {
 }
 
 function EventsContent() {
-  const { client: smartWalletClient } = useSmartWallets();
-  // const { tickets, loading, error } = useTickets();
-  const [tickets, setTickets] = useState([]);
+  const { tickets, loading, error } = useTickets();
 
-  useEffect(() => {
-    const getTickets = async () => {
-      if (!smartWalletClient) return;
-      const tx = await smartWalletClient.sendTransaction({
-        to: CONTRACT_ADDRESS,
-        data: encodeFunctionData({
-          abi: ABI,
-          functionName: "getAllTickets",
-          args: [],
-        }),
-      });
-    };
-    getTickets();
-  }, []);
-
-  // if (loading) return <p>Loading...</p>;
-  // if (error) return <p>Error: {error}</p>;
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error: {error}</p>;
 
   return (
     <div className="min-h-screen bg-white">
