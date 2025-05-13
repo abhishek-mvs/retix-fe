@@ -5,15 +5,24 @@ import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { useTicketById } from "@/calls/get-ticket";
-import { formatTimestamp, formatTimeLeft, formatUSDC } from "@/utils/formatters";
+import {
+  formatTimestamp,
+  formatTimeLeft,
+  formatUSDC,
+} from "@/utils/formatters";
 import { useState } from "react";
 import BidPopup from "@/components/bid-popup";
 import { useAddUserBid } from "@/calls/add-user-bid";
 import { toast } from "sonner";
 import { getTicketStatusString } from "@/types";
+import { useSmartWallets } from "@privy-io/react-auth/smart-wallets";
 
 export default function EventPage({ id }: { id: number }) {
   const { ticket } = useTicketById(id);
+  const { client: smartWalletClient } = useSmartWallets();
+
+  console.log({ smartWalletClient });
+
   const [isBidPopupOpen, setIsBidPopupOpen] = useState(false);
   const { placeBid, loading, error } = useAddUserBid();
 
@@ -89,7 +98,9 @@ export default function EventPage({ id }: { id: number }) {
         {/* Event Details */}
         <div className="md:w-1/2 w-full flex flex-col justify-center space-y-6 p-6 md:p-0">
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold mb-2 text-gray-900 leading-tight">{ticket.eventName}</h1>
+            <h1 className="text-2xl md:text-3xl font-bold mb-2 text-gray-900 leading-tight">
+              {ticket.eventName}
+            </h1>
             <p className="text-base text-gray-500 mb-4 flex items-center gap-2">
               <span className="inline-block bg-gray-100 px-2 py-0.5 rounded-full font-medium text-gray-700 text-sm">
                 {formatTimestamp(ticket.eventDate)}
@@ -101,24 +112,44 @@ export default function EventPage({ id }: { id: number }) {
           </div>
 
           <div className="bg-gray-50 p-4 rounded-2xl border border-gray-100">
-            <h2 className="text-lg font-semibold mb-2 text-gray-900">About this event</h2>
+            <h2 className="text-lg font-semibold mb-2 text-gray-900">
+              About this event
+            </h2>
             <p className="text-gray-700 text-sm">{ticket.eventDetails}</p>
           </div>
 
           <div className="bg-gray-50 p-4 rounded-2xl border border-gray-100">
-            <h2 className="text-lg font-semibold mb-3 text-gray-900">Ticket Information</h2>
+            <h2 className="text-lg font-semibold mb-3 text-gray-900">
+              Ticket Information
+            </h2>
             <div className="divide-y divide-gray-200">
               <div className="flex justify-between py-2">
-                <span className="text-gray-600 font-medium text-sm">Minimum Bid:</span>
-                <span className="text-green-700 font-bold text-base">{formatUSDC(ticket.minBid)} USDC</span>
+                <span className="text-gray-600 font-medium text-sm">
+                  Minimum Bid:
+                </span>
+                <span className="text-green-700 font-bold text-base">
+                  {formatUSDC(ticket.minBid)} USDC
+                </span>
               </div>
               <div className="flex justify-between py-2">
-                <span className="text-gray-600 font-medium text-sm">Bid Expires:</span>
-                <span className="text-gray-800 text-sm">{formatTimestamp(ticket.bidExpiryTime)}</span>
+                <span className="text-gray-600 font-medium text-sm">
+                  Bid Expires:
+                </span>
+                <span className="text-gray-800 text-sm">
+                  {formatTimestamp(ticket.bidExpiryTime)}
+                </span>
               </div>
               <div className="flex justify-between py-2">
-                <span className="text-gray-600 font-medium text-sm">Time Left:</span>
-                <span className={`font-bold text-sm ${isExpired ? 'text-red-600' : 'text-green-600'}`}>{formatTimeLeft(ticket.bidExpiryTime)}</span>
+                <span className="text-gray-600 font-medium text-sm">
+                  Time Left:
+                </span>
+                <span
+                  className={`font-bold text-sm ${
+                    isExpired ? "text-red-600" : "text-green-600"
+                  }`}
+                >
+                  {formatTimeLeft(ticket.bidExpiryTime)}
+                </span>
               </div>
               <div className="flex justify-between py-2">
                 <span className="text-gray-600 font-medium text-sm">Status:</span>
@@ -127,17 +158,9 @@ export default function EventPage({ id }: { id: number }) {
             </div>
           </div>
 
-          {/* Bid Button or Status Message */}
-          {!isActive ? (
-            <div className="w-full text-center py-2 text-base font-semibold text-red-600 bg-red-50 rounded-xl border border-red-200">
-              {Number(ticket.status) === 1 ? "Ticket is pending verification" : 
-               Number(ticket.status) === 2 ? "Ticket has been sold" :
-               "Ticket is no longer available"}
-            </div>
-          ) : isExpired ? (
-            <div className="w-full text-center py-2 text-base font-semibold text-red-600 bg-red-50 rounded-xl border border-red-200">
-              Bidding time is expired
-            </div>
+          {/* Bid Button or Expired Message */}
+          {isExpired ? (
+            <div className="w-full text-center py-2 text-base font-semibold text-red-600 bg-red-50 rounded-xl border border-red-200">Bidding time is expired</div>
           ) : (
             <Button
               className="w-full bg-green-600 hover:bg-green-700 text-white py-2 text-base font-semibold rounded-xl shadow transition-colors"

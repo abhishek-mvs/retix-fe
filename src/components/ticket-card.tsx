@@ -48,9 +48,7 @@ export default function TicketCard({ ticket, type }: TicketCardProps) {
           <div className="p-6 md:col-span-3">
             <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4">
               <div>
-                <h2 className="text-xl font-bold mb-2">
-                  {ticket.eventDetails}
-                </h2>
+                <h2 className="text-xl font-bold mb-2">{ticket.eventName}</h2>
                 <div className="space-y-2 text-gray-600">
                   <div className="flex items-center">
                     <Calendar className="h-4 w-4 mr-2" />

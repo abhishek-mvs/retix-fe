@@ -1,30 +1,26 @@
 import { useEffect, useState } from "react";
-import { BrowserProvider, Contract } from "ethers";
+import { Contract, JsonRpcProvider } from "ethers";
 import ABI from "../data/abi.json";
 import { Ticket } from "@/types";
-import { CONTRACT_ADDRESS } from "@/data/constants";
+import { CONTRACT_ADDRESS, RPC } from "@/data/constants";
+import { usePrivy } from "@privy-io/react-auth";
 
 export const useSellerTickets = () => {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { user } = usePrivy();
 
   const fetchTickets = async () => {
     try {
       setLoading(true);
       setError(null);
 
-      if (!window.ethereum) throw new Error("No wallet found");
-
-      const provider = new BrowserProvider(window.ethereum);
-      const signer = await provider.getSigner();
-      const contract = new Contract(CONTRACT_ADDRESS, ABI, signer);
-      const tickets = await contract.getSellerTickets(signer.getAddress());
-      console.log("ticketsRaw", tickets);
-
+      const provider = new JsonRpcProvider(RPC);
+      const contract = new Contract(CONTRACT_ADDRESS, ABI, provider);
 
       const allTickets: Ticket[] = await contract.getSellerTickets(
-        signer.getAddress()
+        user?.wallet?.address
       );
       console.log("allSellerTickets", allTickets);
       setTickets(allTickets);

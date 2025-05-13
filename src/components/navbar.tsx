@@ -1,7 +1,6 @@
 import type React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { useWallet } from "@/contexts/WalletContext";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, LogOut } from "lucide-react";
@@ -11,22 +10,24 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { usePrivy } from "@privy-io/react-auth";
 
 export default function Navbar() {
-  const { wallet, connect, disconnect, isConnecting } = useWallet();
+  // const { wallet, connect, disconnect, isConnecting } = useWallet();
   const router = useRouter();
+  const { login, logout, user } = usePrivy();
 
-  const handleConnect = async () => {
-    try {
-      await connect();
-    } catch (error) {
-      console.error('Failed to connect wallet:', error);
-    }
-  };
+  // const handleConnect = async () => {
+  //   try {
+  //     await connect();
+  //   } catch (error) {
+  //     console.error("Failed to connect wallet:", error);
+  //   }
+  // };
 
   const handleDisconnect = () => {
-    disconnect();
-    router.push('/');
+    logout();
+    router.push("/");
   };
 
   return (
@@ -45,20 +46,18 @@ export default function Navbar() {
 
       <div className="flex items-center space-x-6">
         <NavLink href="/events">Explore</NavLink>
-        {wallet && (
+        {user && (
           <>
             <NavLink href="/sell">Sell</NavLink>
             <NavLink href="/my-tickets">My Tickets</NavLink>
             <NavLink href="/my-bids">My Bids</NavLink>
           </>
         )}
-        {wallet ? (
+        {user ? (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" className="flex items-center gap-2">
-                <span className="text-sm">
-                  {wallet.address.slice(0, 6)}...{wallet.address.slice(-4)}
-                </span>
+                <span className="text-sm">{user.email?.address}</span>
                 <ChevronDown className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
@@ -68,17 +67,18 @@ export default function Navbar() {
                 onClick={handleDisconnect}
               >
                 <LogOut className="h-4 w-4 mr-2" />
-                Disconnect Wallet
+                Logout
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         ) : (
           <Button
-            onClick={handleConnect}
-            disabled={isConnecting}
+            onClick={login}
+            // disabled={isConnecting}
             className="bg-green-600 hover:bg-green-700 text-white"
           >
-            {isConnecting ? 'Connecting...' : 'Connect Wallet'}
+            Login
+            {/* {isConnecting ? "Connecting..." : "Connect Wallet"} */}
           </Button>
         )}
       </div>
