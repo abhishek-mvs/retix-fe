@@ -20,20 +20,33 @@ interface SellerTicketVerifierQRProps {
   ticketId: number;
 }
 
+// Initialize Reclaim SDK outside the component
+const initializeReclaimSDK = async () => {
+  return await ReclaimProofRequest.init(
+    RECLAIM_APP_ID,
+    RECLAIM_APP_SECRET,
+    TICKET_VERIFIER_PROVIDER_ID
+  );
+};
+
 function SellerTicketVerifierQR({ onVerified, ticketId }: SellerTicketVerifierQRProps) {
   const [requestUrl, setRequestUrl] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [verificationProof, setVerificationProof] = useState<Proof | null>(null);
   const { bestBid, loading: bidLoading, error: bidError } = useBestBid(ticketId);
+
+  // Handle verification proof updates
+  useEffect(() => {
+    if (verificationProof && onVerified) {
+      onVerified(verificationProof);
+    }
+  }, [verificationProof, onVerified]);
 
   const getVerificationReq = useCallback(async () => {
     try {
       setIsLoading(true);
-      // Initialize the Reclaim SDK with your credentials
-      const reclaimProofRequest = await ReclaimProofRequest.init(
-        RECLAIM_APP_ID,
-        RECLAIM_APP_SECRET,
-        TICKET_VERIFIER_PROVIDER_ID
-      );
+      // Use the external initialization function
+      const reclaimProofRequest = await initializeReclaimSDK();
     
       // Generate the verification request URL
       const requestUrl = await reclaimProofRequest.getRequestUrl();
@@ -56,11 +69,11 @@ function SellerTicketVerifierQR({ onVerified, ticketId }: SellerTicketVerifierQR
                   "Verification success",
                   JSON.stringify(proofs.map((p) => p.claimData.context))
                 );
-                if (onVerified) onVerified(proofs[0]);
+                setVerificationProof(proofs[0]);
               } else {
                 // when using provider with a single proof, we get a single proof object
                 console.log("Verification success", proofs?.claimData.context);
-                if (onVerified) onVerified(proofs as Proof);
+                setVerificationProof(proofs as Proof);
               }
             }
           }
@@ -75,7 +88,7 @@ function SellerTicketVerifierQR({ onVerified, ticketId }: SellerTicketVerifierQR
     } finally {
       setIsLoading(false);
     }
-  }, [onVerified]);
+  }, []);
 
   useEffect(() => {
     getVerificationReq();

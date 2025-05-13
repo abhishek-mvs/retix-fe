@@ -4,9 +4,12 @@ import { CONTRACT_ADDRESS } from "@/data/constants";
 import { useSmartWallets } from "@privy-io/react-auth/smart-wallets";
 import { encodeFunctionData } from "viem";
 
-export const confirmTicketDelivery = async (ticketId: number) => {
-  const { client: smartWalletClient } = useSmartWallets();
+type SmartWalletClient = ReturnType<typeof useSmartWallets>['client'];
 
+export const confirmTicketDelivery = async (
+  ticketId: number,
+  smartWalletClient: SmartWalletClient
+) => {
   if (!smartWalletClient) throw new Error("No Smart Wallet");
 
   try {
