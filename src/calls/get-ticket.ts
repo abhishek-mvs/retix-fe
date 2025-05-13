@@ -1,8 +1,8 @@
 import { useEffect, useState, useCallback } from "react";
-import { BrowserProvider, Contract } from "ethers";
+import { BrowserProvider, Contract, JsonRpcProvider } from "ethers";
 import ABI from "../data/abi.json";
 import { Ticket } from "@/types";
-import { CONTRACT_ADDRESS } from "@/data/constants";
+import { CONTRACT_ADDRESS, RPC } from "@/data/constants";
 
 export const useTicketById = (id: number | string) => {
   const [ticket, setTicket] = useState<Ticket | null>(null);
@@ -13,13 +13,9 @@ export const useTicketById = (id: number | string) => {
     try {
       setLoading(true);
       setError(null);
-
-      if (!window.ethereum) throw new Error("No wallet found");
-
-      const provider = new BrowserProvider(window.ethereum);
-      const signer = await provider.getSigner();
-      const contract = new Contract(CONTRACT_ADDRESS, ABI, signer);
-
+      const provider = new JsonRpcProvider(RPC);
+      const contract = new Contract(CONTRACT_ADDRESS, ABI, provider);
+     
       const ticketData: Ticket = await contract.tickets(id);
       setTicket(ticketData);
     } catch (err) {

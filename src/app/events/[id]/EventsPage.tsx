@@ -19,9 +19,6 @@ import { useSmartWallets } from "@privy-io/react-auth/smart-wallets";
 
 export default function EventPage({ id }: { id: number }) {
   const { ticket } = useTicketById(id);
-  const { client: smartWalletClient } = useSmartWallets();
-
-  console.log({ smartWalletClient });
 
   const [isBidPopupOpen, setIsBidPopupOpen] = useState(false);
   const { placeBid, loading, error } = useAddUserBid();
