@@ -40,7 +40,7 @@ function MyTicketsContent() {
   };
 
   const handleVerificationComplete = async (proof: { claimData: { context: string } }) => {
-    if (!verifyingTicketId) return;
+    if (verifyingTicketId === null) return;
     
     try {
       setIsConfirming(true);
@@ -95,7 +95,7 @@ function MyTicketsContent() {
         <Navbar />
 
         {/* Verification Modal */}
-        {showVerifier && verifyingTicketId && (
+        {showVerifier && verifyingTicketId !== null && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
               {isConfirming ? (

@@ -19,11 +19,14 @@ export const useSellerTickets = () => {
       const provider = new BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
       const contract = new Contract(CONTRACT_ADDRESS, ABI, signer);
+      const tickets = await contract.getSellerTickets(signer.getAddress());
+      console.log("ticketsRaw", tickets);
+
 
       const allTickets: Ticket[] = await contract.getSellerTickets(
         signer.getAddress()
       );
-      console.log("allTickets", allTickets);
+      console.log("allSellerTickets", allTickets);
       setTickets(allTickets);
     } catch (err) {
       console.error(err);
