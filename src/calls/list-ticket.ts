@@ -71,7 +71,6 @@ export function useListTicket() {
       setLoading(true);
       setError(null);
 
-      if (!window.ethereum) throw new Error("Wallet not detected");
       if (!smartWalletClient) throw new Error("No Smart Wallet");
       console.log("smartWalletClient", smartWalletClient);
       console.log("privateBookingHash", privateBookingHash);

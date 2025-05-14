@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, LogOut, Copy, Wallet } from "lucide-react";
+import { ChevronDown, LogOut, Copy } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -84,11 +84,11 @@ export default function Navbar() {
       <div className="flex items-center">
         <Link href="/" className="mr-8">
           <Image
-            src="/placeholder.svg?height=50&width=150"
+            src="/logo.svg"
             alt="Logo"
             width={150}
-            height={50}
-            className="h-10 w-auto"
+            height={30}
+            className="h-6 w-auto"
           />
         </Link>
       </div>

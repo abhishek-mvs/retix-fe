@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -32,6 +32,15 @@ export default function MobileMockupFlow({ steps }: MobileMockupFlowProps) {
       setActiveStep(activeStep + 1);
     }
   };
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveStep((prevStep) => (prevStep + 1) % steps.length);
+    }, 3000); // 3 seconds
+
+    // Cleanup the interval on unmount
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <div className="relative">
@@ -66,7 +75,7 @@ export default function MobileMockupFlow({ steps }: MobileMockupFlowProps) {
         className="flex overflow-x-auto pb-8 hide-scrollbar snap-x snap-mandatory"
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
-        <div className="flex space-x-4 px-4">
+        <div className="flex space-x-2 px-4">
           {steps.map((step, index) => (
             <div
               key={step.id}

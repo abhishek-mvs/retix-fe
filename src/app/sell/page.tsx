@@ -1,8 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import Navbar from "@/components/navbar";
-import { ArrowLeft, Tag, Info } from "lucide-react";
-import Link from "next/link";
+import { Tag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -11,6 +10,7 @@ import TicketVerfierQR from "@/components/ticket-verifier";
 import Image from "next/image.js";
 import { keccak256 } from "ethers";
 import { encodeAbiParameters } from "viem";
+import { PinataSDK } from "pinata";
 
 interface Proof {
   claimData: {
@@ -34,15 +34,58 @@ export default function SellPage() {
 
   const [ticketImage, setTicketImage] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [ipfsUrl, setIpfsUrl] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+
+  const uploadToIPFS = async (file: File) => {
+    try {
+      setIsUploading(true);
+      
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Upload failed');
+      }
+
+      const data = await response.json();
+      setIpfsUrl(data.url);
+      return data.url;
+    } catch (error) {
+      console.error('Error uploading to IPFS:', error);
+      throw error;
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files && files.length > 0) {
+      // If there's already an image, don't allow another one
+      if (ticketImage) {
+        alert('You can only upload one image. Please remove the existing image first.');
+        e.target.value = ''; // Clear the input
+        return;
+      }
+
       const file = files[0];
       setTicketImage(file);
-      setPreviewUrl(URL.createObjectURL(file)); // Create a preview URL
+      const url = URL.createObjectURL(file);
+      setPreviewUrl(url);
     }
   };
+
+  useEffect(() => {
+    if (previewUrl) {
+      console.log("previewUrl", previewUrl);
+    }
+  }, [previewUrl]);
 
   useEffect(() => {
     function calculateFinalPrice(): number {
@@ -60,18 +103,28 @@ export default function SellPage() {
     if (!eventDate || !actualEventTimestamp) return 0;
 
     // Subtract time from actual event for expiry values
-    const bidExpiry = actualEventTimestamp - 2 * 60; // 5 mins before event
-    const sellerExpiryTime = actualEventTimestamp + 45 * 60; // 2 mins before event
-    console.log("bidExpiry", bidExpiry);
-    console.log("sellerExpiryTime", sellerExpiryTime);
+    const bidExpiry = actualEventTimestamp - 2 * 60;
+    const sellerExpiryTime = actualEventTimestamp + 45 * 60;
+
+    let finalImageUrl = "https://assets-in.bmscdn.com/iedb/movies/images/mobile/listing/medium/raid-2-et00382745-1742820522.jpg";
+    
+    // Only upload to IPFS if there's a ticket image
+    if (ticketImage) {
+      try {
+        finalImageUrl = await uploadToIPFS(ticketImage);
+      } catch (error) {
+        console.error('Failed to upload image to IPFS:', error);
+        alert('Failed to upload image. Please try again.');
+        return;
+      }
+    }
 
     await listTicket({
       eventDetails,
       eventName,
       eventDate: actualEventTimestamp,
       eventLocation,
-      ticketImage:
-        "https://assets-in.bmscdn.com/iedb/movies/images/mobile/listing/medium/raid-2-et00382745-1742820522.jpg",
+      ticketImage: finalImageUrl,
       sellerFID: 0,
       minBid: parseInt(minBid),
       bidExpiry,
@@ -118,10 +171,10 @@ export default function SellPage() {
         // Adjust for IST (UTC+5:30)
         date.setHours(date.getHours() - 5);
         date.setMinutes(date.getMinutes() - 30);
-        
-        const timestamp = Math.floor(date.getTime() / 1000);
-        
-        const timestamp10MinsFromNow = Math.floor((Date.now() + 60 * 60 * 1000) / 1000);
+
+        const timestamp10MinsFromNow = Math.floor(
+          (Date.now() + 60 * 60 * 1000) / 1000
+        );
         setActualEventTimestamp(timestamp10MinsFromNow);
         console.log("actualEventTimestamp", timestamp10MinsFromNow);
       }
@@ -136,90 +189,154 @@ export default function SellPage() {
         <Navbar />
 
         <div className="py-8">
-          <Link
-            href="/"
-            className="inline-flex items-center text-green-600 mb-6"
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to home
-          </Link>
-
           <h1 className="text-3xl font-bold mb-8">Sell Your Tickets</h1>
 
           {!isVerified ? (
             <TicketVerfierQR onVerified={handleProofVerified} />
           ) : (
             <>
-              <div className="grid md:grid-cols-3 gap-8">
-                <div className="md:col-span-2">
-                  <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6">
-                    <h2 className="text-xl font-semibold mb-4">
-                      Event Details
-                    </h2>
+              <div className="grid md:grid-cols-12 gap-8">
+                {/* Left Column - Event Image and Basic Details */}
+                <div className="md:col-span-5">
+                  <div className="space-y-4">
+                    <div>
+                      <label
+                        htmlFor="event-name"
+                        className="block text-sm font-medium text-gray-700 mb-1"
+                      >
+                        Event Name
+                      </label>
+                      <Input
+                        id="event-name"
+                        value={eventName}
+                        readOnly
+                        className="bg-gray-100"
+                      />
+                    </div>
 
-                    <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
                       <div>
                         <label
-                          htmlFor="event-name"
+                          htmlFor="event-date"
                           className="block text-sm font-medium text-gray-700 mb-1"
                         >
-                          Event Name
+                          Event Date
                         </label>
                         <Input
-                          id="event-name"
-                          value={eventName}
+                          id="event-date"
+                          value={eventDate}
                           readOnly
                           className="bg-gray-100"
                         />
                       </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <label
-                            htmlFor="event-date"
-                            className="block text-sm font-medium text-gray-700 mb-1"
-                          >
-                            Event Date
-                          </label>
-                          <Input
-                            id="event-date"
-                            value={eventDate}
-                            readOnly
-                            className="bg-gray-100"
-                          />
-                        </div>
-                        <div>
-                          <label
-                            htmlFor="event-location"
-                            className="block text-sm font-medium text-gray-700 mb-1"
-                          >
-                            Event Location
-                          </label>
-                          <Input
-                            id="event-location"
-                            value={eventLocation}
-                            readOnly
-                            className="bg-gray-100"
-                          />
-                        </div>
-                      </div>
-
                       <div>
-                        <label
-                          htmlFor="event-details"
-                          className="block text-sm font-medium text-gray-700 mb-1"
-                        >
-                          Event Details
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Event Location
                         </label>
-                        <Input
-                          id="event-details"
-                          value={eventDetails}
-                          readOnly
-                          className="bg-gray-100"
-                        />
+                        <div className="bg-gray-100 p-3 rounded-md flex items-center">
+                          <svg
+                            className="h-5 w-5 text-gray-500 mr-2"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                            />
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                            />
+                          </svg>
+                          {eventLocation}
+                        </div>
                       </div>
+                    </div>
+
+                    <div>
+                      <label
+                        htmlFor="event-details"
+                        className="block text-sm font-medium text-gray-700 mb-1"
+                      >
+                        Event Details
+                      </label>
+                      <Input
+                        id="event-details"
+                        value={eventDetails}
+                        readOnly
+                        className="bg-gray-100"
+                      />
                     </div>
                   </div>
 
+                  <div className="my-4">
+                    <label
+                      htmlFor="ticketImage"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
+                      Ticket Image Upload
+                    </label>
+
+                    <div
+                      className="w-full h-22 border-2 border-dashed border-gray-300 rounded-md flex flex-col items-center justify-center cursor-pointer hover:border-gray-400 bg-gray-50"
+                      onClick={() =>
+                        document.getElementById("ticketImageInput")?.click()
+                      }
+                    >
+                      <svg
+                        className="h-6 w-6 text-gray-400 mb-1"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1M12 12v9m0 0l-3-3m3 3l3-3M16 7h-1a4 4 0 00-8 0H6a2 2 0 00-2 2v2h16V9a2 2 0 00-2-2z"
+                        />
+                      </svg>
+                      <p className="text-sm text-gray-500">
+                        Upload Ticket Image (png, jpeg, pdf and more)
+                      </p>
+                    </div>
+
+                    <input
+                      type="file"
+                      id="ticketImageInput"
+                      className="hidden"
+                      accept="image/*,.pdf"
+                      onChange={handleImageChange}
+                    />
+                    {/* 🔽 Show preview if available and not a PDF */}
+                    {previewUrl &&
+                      !ticketImage?.name.toLowerCase().endsWith(".pdf") && (
+                        <Image
+                          src={previewUrl}
+                          alt="Ticket Preview"
+                          className="mt-4 w-full max-h-64 object-contain rounded border"
+                          width={100}
+                          height={100}
+                        />
+                      )}
+
+                    {/* If it's a PDF, show a file name */}
+                    {ticketImage?.name.toLowerCase().endsWith(".pdf") && (
+                      <p className="mt-2 text-sm text-gray-600">
+                        Selected PDF: {ticketImage.name}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Right Column - Ticket Details and Listing Summary */}
+                <div className="md:col-span-7">
                   <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6">
                     <h2 className="text-xl font-semibold mb-4">
                       Ticket Details
@@ -260,104 +377,70 @@ export default function SellPage() {
                           id="description"
                           placeholder="Add details about your tickets (section, row, etc.)"
                           rows={4}
+                          className="bg-gray-50"
                           onChange={(e) => setEventDetails(e.target.value)}
+                          defaultValue={eventDetails}
                         />
-                      </div>
-                      <div className="mb-4">
-                        <label
-                          htmlFor="ticketImage"
-                          className="block text-sm font-medium text-gray-700 mb-1"
-                        >
-                          Ticket Image Upload
-                        </label>
-
-                        <div
-                          className="w-full h-32 border-2 border-dashed border-gray-300 rounded-md flex flex-col items-center justify-center cursor-pointer hover:border-gray-400 bg-gray-50"
-                          onClick={() =>
-                            document.getElementById("ticketImageInput")?.click()
-                          }
-                        >
-                          <svg
-                            className="h-6 w-6 text-gray-400 mb-1"
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1M12 12v9m0 0l-3-3m3 3l3-3M16 7h-1a4 4 0 00-8 0H6a2 2 0 00-2 2v2h16V9a2 2 0 00-2-2z"
-                            />
-                          </svg>
-                          <p className="text-sm text-gray-500">
-                            Upload Ticket Image
-                          </p>
-                          <p className="text-xs text-gray-400">
-                            (png, jpeg, pdf and more)
-                          </p>
-                        </div>
-
-                        <input
-                          type="file"
-                          id="ticketImageInput"
-                          className="hidden"
-                          accept="image/*,.pdf"
-                          onChange={handleImageChange}
-                        />
-
-                        {/* 🔽 Show preview if available and not a PDF */}
-                        {previewUrl &&
-                          !ticketImage?.name.toLowerCase().endsWith(".pdf") && (
-                            <Image
-                              src={previewUrl}
-                              alt="Ticket Preview"
-                              className="mt-2 w-full max-h-64 object-contain rounded border"
-                              width={100}
-                              height={100}
-                            />
-                          )}
-
-                        {/* If it's a PDF, show a file name */}
-                        {ticketImage?.name.toLowerCase().endsWith(".pdf") && (
-                          <p className="mt-2 text-sm text-gray-600">
-                            Selected PDF: {ticketImage.name}
-                          </p>
-                        )}
                       </div>
                     </div>
                   </div>
-                </div>
 
-                <div className="md:col-span-1">
-                  <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 sticky top-6">
+                  <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
                     <h2 className="text-xl font-semibold mb-4">
                       Listing Summary
                     </h2>
 
                     <div className="space-y-4">
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Service Fee</span>
-                        <span>$2</span>
+                      <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                        <div className="flex items-center">
+                          <span className="text-gray-600">Service Fee</span>
+                          <button className="ml-1 text-gray-400 hover:text-gray-600">
+                            <svg
+                              className="h-4 w-4"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                              />
+                            </svg>
+                          </button>
+                        </div>
+                        <span className="font-medium">$2</span>
                       </div>
 
-                      <div className="flex justify-between font-semibold">
-                        <span>Estimate you&apos;ll Receive</span>
-                        <span>${finalEstimate ? finalEstimate : "---"}</span>
-                      </div>
-
-                      <div className="bg-green-50 p-4 rounded-lg text-sm text-green-800 flex">
-                        <Info className="h-5 w-5 mr-2 flex-shrink-0" />
-                        <p>
-                          Your tickets will be listed immediately after
-                          submission and verification. You&apos;ll be paid once
-                          the tickets are sold.
-                        </p>
+                      <div className="flex justify-between items-center py-2">
+                        <div className="flex items-center">
+                          <span className="text-gray-800 font-medium">
+                            Estimate you will receive
+                          </span>
+                          <button className="ml-1 text-gray-400 hover:text-gray-600">
+                            <svg
+                              className="h-4 w-4"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                              />
+                            </svg>
+                          </button>
+                        </div>
+                        <span className="font-bold text-lg">
+                          ${finalEstimate}
+                        </span>
                       </div>
 
                       <Button
-                        className="w-full bg-green-600 hover:bg-green-700 text-white cursor-pointer"
+                        className="w-full bg-black hover:bg-gray-800 text-white py-6 mt-4"
                         onClick={handleList}
                       >
                         List Tickets for Sale

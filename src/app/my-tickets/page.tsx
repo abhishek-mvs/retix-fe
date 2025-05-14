@@ -5,33 +5,24 @@ import { useSellerTickets } from "@/calls/get-seller-tickets";
 import TicketCard from "@/components/ticket-card";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Ticket } from "@/types";
 import { formatTimeLeft } from "@/utils/formatters";
-import { Suspense } from "react";
 import SellerTicketVerifierQR from "@/components/seller-ticket-verifier";
 import { confirmTicketDelivery } from "@/calls/confirm-ticket-delivery";
-import { filterActiveTickets, filterPendingTickets, filterPastTickets } from "@/utils/ticket-filters";
+import {
+  filterActiveTickets,
+  filterPendingTickets,
+  filterPastTickets,
+} from "@/utils/ticket-filters";
 import { useSmartWallets } from "@privy-io/react-auth/smart-wallets";
 
 export default function MyTicketsPage() {
-  return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
-          <p className="text-lg text-gray-600">Loading...</p>
-        </div>
-      </div>
-    }>
-      <MyTicketsContent />
-    </Suspense>
-  );
-}
-
-function MyTicketsContent() {
   const { tickets, loading, error, refetch } = useSellerTickets();
-  const [verifyingTicketId, setVerifyingTicketId] = useState<number | null>(null);
-  const [activeTab, setActiveTab] = useState<'active' | 'pending' | 'past'>('active');
+  const [verifyingTicketId, setVerifyingTicketId] = useState<number | null>(
+    null
+  );
+  const [activeTab, setActiveTab] = useState<"active" | "pending" | "past">(
+    "active"
+  );
   const [showVerifier, setShowVerifier] = useState(false);
   const [isConfirming, setIsConfirming] = useState(false);
   const { client: smartWalletClient } = useSmartWallets();
@@ -41,9 +32,12 @@ function MyTicketsContent() {
     setShowVerifier(true);
   };
 
-  const handleVerificationComplete = async (proof: { claimData: { context: string } }) => {
+  const handleVerificationComplete = async (proof: {
+    claimData: { context: string };
+  }) => {
+    console.log(proof);
     if (verifyingTicketId === null || !smartWalletClient) return;
-    
+
     try {
       setIsConfirming(true);
       await confirmTicketDelivery(verifyingTicketId, smartWalletClient);
@@ -68,28 +62,30 @@ function MyTicketsContent() {
   const pendingTickets = filterPendingTickets(tickets);
   const pastTickets = filterPastTickets(tickets);
 
-  if (loading) return (
-    <div className="min-h-screen bg-white flex items-center justify-center">
-      <div className="text-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
-        <p className="text-lg text-gray-600">Loading your tickets...</p>
+  if (loading)
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
+          <p className="text-lg text-gray-600">Loading your tickets...</p>
+        </div>
       </div>
-    </div>
-  );
+    );
 
-  if (error) return (
-    <div className="min-h-screen bg-white flex items-center justify-center">
-      <div className="text-center p-6 bg-red-50 rounded-lg max-w-md">
-        <p className="text-red-600 font-medium text-lg">Error: {error}</p>
-        <Button 
-          onClick={() => window.location.reload()} 
-          className="mt-4 bg-red-600 hover:bg-red-700 text-white"
-        >
-          Try Again
-        </Button>
+  if (error)
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center p-6 bg-red-50 rounded-lg max-w-md">
+          <p className="text-red-600 font-medium text-lg">Error: {error}</p>
+          <Button
+            onClick={() => window.location.reload()}
+            className="mt-4 bg-red-600 hover:bg-red-700 text-white"
+          >
+            Try Again
+          </Button>
+        </div>
       </div>
-    </div>
-  );
+    );
 
   return (
     <div className="min-h-screen bg-white">
@@ -103,12 +99,16 @@ function MyTicketsContent() {
               {isConfirming ? (
                 <div className="flex flex-col items-center justify-center p-6">
                   <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mb-4"></div>
-                  <p className="text-lg text-gray-600">Confirming ticket delivery...</p>
-                  <p className="text-sm text-gray-500 mt-2">Please wait while we process your transaction</p>
+                  <p className="text-lg text-gray-600">
+                    Confirming ticket delivery...
+                  </p>
+                  <p className="text-sm text-gray-500 mt-2">
+                    Please wait while we process your transaction
+                  </p>
                 </div>
               ) : (
                 <>
-                  <SellerTicketVerifierQR 
+                  <SellerTicketVerifierQR
                     ticketId={verifyingTicketId}
                     onVerified={handleVerificationComplete}
                   />
@@ -137,11 +137,11 @@ function MyTicketsContent() {
           <div className="border-b border-gray-200 mb-8">
             <nav className="-mb-px flex space-x-8">
               <button
-                onClick={() => setActiveTab('active')}
+                onClick={() => setActiveTab("active")}
                 className={`${
-                  activeTab === 'active'
-                    ? 'border-green-500 text-green-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  activeTab === "active"
+                    ? "border-green-500 text-green-600"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                 } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
               >
                 Active Tickets
@@ -150,11 +150,11 @@ function MyTicketsContent() {
                 </span>
               </button>
               <button
-                onClick={() => setActiveTab('pending')}
+                onClick={() => setActiveTab("pending")}
                 className={`${
-                  activeTab === 'pending'
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  activeTab === "pending"
+                    ? "border-blue-500 text-blue-600"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                 } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
               >
                 Pending Verification
@@ -163,11 +163,11 @@ function MyTicketsContent() {
                 </span>
               </button>
               <button
-                onClick={() => setActiveTab('past')}
+                onClick={() => setActiveTab("past")}
                 className={`${
-                  activeTab === 'past'
-                    ? 'border-gray-500 text-gray-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  activeTab === "past"
+                    ? "border-gray-500 text-gray-600"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                 } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
               >
                 Past Tickets
@@ -179,7 +179,7 @@ function MyTicketsContent() {
           </div>
 
           {/* Active Tickets Section */}
-          {activeTab === 'active' && (
+          {activeTab === "active" && (
             <section>
               {activeTickets.length === 0 ? (
                 <EmptyState message="No active tickets" />
@@ -203,7 +203,7 @@ function MyTicketsContent() {
           )}
 
           {/* Pending Verification Section */}
-          {activeTab === 'pending' && (
+          {activeTab === "pending" && (
             <section>
               {pendingTickets.length === 0 ? (
                 <EmptyState message="No tickets pending verification" />
@@ -215,15 +215,18 @@ function MyTicketsContent() {
                       <div className="mt-4 flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <span className="text-sm text-gray-600">
-                            Verify within {formatTimeLeft(ticket.sellerExpiryTime)}
+                            Verify within{" "}
+                            {formatTimeLeft(ticket.sellerExpiryTime)}
                           </span>
                         </div>
-                        <Button 
+                        <Button
                           onClick={() => handleVerifyTicket(ticket.id)}
                           disabled={verifyingTicketId === ticket.id}
                           className="bg-blue-600 hover:bg-blue-700 text-white"
                         >
-                          {verifyingTicketId === ticket.id ? 'Verifying...' : 'Verify Ticket Sent'}
+                          {verifyingTicketId === ticket.id
+                            ? "Verifying..."
+                            : "Verify Ticket Sent"}
                         </Button>
                       </div>
                     </div>
@@ -234,7 +237,7 @@ function MyTicketsContent() {
           )}
 
           {/* Past Tickets Section */}
-          {activeTab === 'past' && (
+          {activeTab === "past" && (
             <section>
               {pastTickets.length === 0 ? (
                 <EmptyState message="No past tickets" />

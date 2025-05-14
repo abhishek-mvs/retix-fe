@@ -1,10 +1,9 @@
-import { Contract } from "ethers";
 import ABI from "../data/abi.json";
 import { CONTRACT_ADDRESS } from "@/data/constants";
 import { useSmartWallets } from "@privy-io/react-auth/smart-wallets";
 import { encodeFunctionData } from "viem";
 
-type SmartWalletClient = ReturnType<typeof useSmartWallets>['client'];
+type SmartWalletClient = ReturnType<typeof useSmartWallets>["client"];
 
 export const confirmTicketDelivery = async (
   ticketId: number,
@@ -13,7 +12,7 @@ export const confirmTicketDelivery = async (
   if (!smartWalletClient) throw new Error("No Smart Wallet");
 
   try {
-    const tx = await smartWalletClient.sendTransaction({
+    await smartWalletClient.sendTransaction({
       to: CONTRACT_ADDRESS,
       data: encodeFunctionData({
         abi: ABI,
@@ -27,4 +26,4 @@ export const confirmTicketDelivery = async (
     console.error("Error confirming ticket delivery:", error);
     throw error;
   }
-}; 
+};
