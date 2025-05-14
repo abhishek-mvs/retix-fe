@@ -4,7 +4,7 @@ import Navbar from "@/components/navbar";
 import { useUserBids } from "@/calls/get-user-bids";
 import { useTickets } from "@/calls/get-tickets";
 import { Bid } from "@/types";
-import { format } from "date-fns";
+import { format, differenceInSeconds, differenceInHours, differenceInDays } from "date-fns";
 import { useState } from "react";
 import Image from "next/image";
 import { formatUSDC } from "@/utils/formatters";
@@ -28,6 +28,22 @@ export default function MyBidsPage() {
 
   const formatDate = (timestamp: bigint) => {
     return format(new Date(Number(timestamp) * 1000), "MMM dd, yyyy HH:mm");
+  };
+
+  const getTimeRemaining = (expiryTime: bigint) => {
+    const now = new Date();
+    const expiry = new Date(Number(expiryTime) * 1000);
+    const secondsRemaining = differenceInSeconds(expiry, now);
+    
+    if (secondsRemaining <= 0) return "Expired";
+    
+    const days = differenceInDays(expiry, now);
+    const hours = differenceInHours(expiry, now) % 24;
+    const minutes = Math.floor((secondsRemaining % 3600) / 60);
+    
+    if (days > 0) return `${days}d ${hours}h remaining`;
+    if (hours > 0) return `${hours}h ${minutes}m remaining`;
+    return `${minutes}m remaining`;
   };
 
   const filteredBids = bids.filter((bid) => 
@@ -81,33 +97,32 @@ export default function MyBidsPage() {
                           <span className="font-medium">Location:</span> {ticket.eventLocation}
                         </p>
                         <p className="text-sm">
-                          <span className="font-medium">Your Bid:</span> {formatUSDC(bid.amount)} USDC
+                          <span className="font-medium">Ticket Price:</span> {formatUSDC(bid.amount)} USDC
                         </p>
-                        <p className="text-sm">
-                          <span className="font-medium">Minimum Bid:</span> {formatUSDC(ticket.minBid)} USDC
-                        </p>
-                        <p className="text-sm">
-                          <span className="font-medium">Bid Time:</span> {formatDate(bid.timestamp)}
-                        </p>
-                        <p className="text-sm">
-                          <span className="font-medium">Bid Expiry:</span> {formatDate(BigInt(ticket.bidExpiryTime))}
-                        </p>
+                        {activeTab === "current" && (
+                          <p className="text-sm">
+                            <span className="font-medium">Receive ticket within:</span>{" "}
+                            <span className={getTimeRemaining(BigInt(ticket.sellerExpiryTime)) === "Expired" ? "text-red-600" : "text-blue-600"}>
+                              {getTimeRemaining(BigInt(ticket.sellerExpiryTime))}
+                            </span>
+                          </p>
+                        )}
                         <p className="text-sm">
                           <span className="font-medium">Status:</span>{" "}
                           <span
                             className={`${
-                              bid.isAccepted
-                                ? "text-green-600"
-                                : bid.isActive
+                              activeTab === "current"
                                 ? "text-blue-600"
-                                : "text-gray-600"
+                                : bid.isAccepted
+                                ? "text-green-600"
+                                : "text-red-600"
                             }`}
                           >
-                            {bid.isAccepted
-                              ? "Won"
-                              : bid.isActive
-                              ? "Active"
-                              : "Expired"}
+                            {activeTab === "current"
+                              ? "Pending"
+                              : bid.isAccepted
+                              ? "Bought"
+                              : "Reverted"}
                           </span>
                         </p>
                       </div>

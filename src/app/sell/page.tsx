@@ -11,6 +11,7 @@ import Image from "next/image.js";
 import { keccak256 } from "ethers";
 import { encodeAbiParameters } from "viem";
 import { PinataSDK } from "pinata";
+import { useRouter } from "next/navigation";
 
 interface Proof {
   claimData: {
@@ -19,6 +20,7 @@ interface Proof {
 }
 
 export default function SellPage() {
+  const router = useRouter();
   const { listTicket } = useListTicket();
   const [eventName, setEventName] = useState("");
   const [eventDate, setEventDate] = useState("");
@@ -119,18 +121,26 @@ export default function SellPage() {
       }
     }
 
-    await listTicket({
-      eventDetails,
-      eventName,
-      eventDate: actualEventTimestamp,
-      eventLocation,
-      ticketImage: finalImageUrl,
-      sellerFID: 0,
-      minBid: parseInt(minBid),
-      bidExpiry,
-      sellerExpiryTime,
-      privateBookingHash,
-    });
+    try {
+      await listTicket({
+        eventDetails,
+        eventName,
+        eventDate: actualEventTimestamp,
+        eventLocation,
+        ticketImage: finalImageUrl,
+        sellerFID: 0,
+        minBid: parseInt(minBid),
+        bidExpiry,
+        sellerExpiryTime,
+        privateBookingHash,
+      });
+      
+      // Navigate to my-tickets page after successful listing
+      router.push('/my-tickets');
+    } catch (error) {
+      console.error('Failed to list ticket:', error);
+      alert('Failed to list ticket. Please try again.');
+    }
   };
 
   const handleProofVerified = (proof: Proof) => {

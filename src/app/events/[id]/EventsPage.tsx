@@ -15,8 +15,10 @@ import BidPopup from "@/components/bid-popup";
 import { useAddUserBid } from "@/calls/add-user-bid";
 import { toast } from "sonner";
 import { getTicketStatusString } from "@/types";
+import { useRouter } from "next/navigation";
 
 export default function EventPage({ id }: { id: number }) {
+  const router = useRouter();
   const { ticket } = useTicketById(id);
 
   const [isBidPopupOpen, setIsBidPopupOpen] = useState(false);
@@ -35,6 +37,8 @@ export default function EventPage({ id }: { id: number }) {
       await placeBid(id, amount, email);
       toast.success("Bid placed successfully!");
       handleCloseBidPopup();
+      // Navigate to my-bids page after successful bid placement
+      router.push('/my-bids');
     } catch (err) {
       console.log("error", err);
       toast.error(error || "Failed to place bid");
@@ -122,20 +126,13 @@ export default function EventPage({ id }: { id: number }) {
             <div className="divide-y divide-gray-200">
               <div className="flex justify-between py-2">
                 <span className="text-gray-600 font-medium text-sm">
-                  Minimum Bid:
+                  Price:
                 </span>
                 <span className="text-green-700 font-bold text-base">
                   {formatUSDC(ticket.minBid)} USDC
                 </span>
               </div>
-              <div className="flex justify-between py-2">
-                <span className="text-gray-600 font-medium text-sm">
-                  Bid Expires:
-                </span>
-                <span className="text-gray-800 text-sm">
-                  {formatTimestamp(ticket.bidExpiryTime)}
-                </span>
-              </div>
+              
               <div className="flex justify-between py-2">
                 <span className="text-gray-600 font-medium text-sm">
                   Time Left:
@@ -169,7 +166,7 @@ export default function EventPage({ id }: { id: number }) {
               className="w-full bg-green-600 hover:bg-green-700 text-white py-2 text-base font-semibold rounded-xl shadow transition-colors"
               onClick={handleOpenBidPopup}
             >
-              Place a Bid
+              Purchase Ticket
             </Button>
           )}
         </div>
