@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { ethers } from "ethers";
+import { ethers, keccak256 } from "ethers";
 import { CONTRACT_ADDRESS } from "@/data/constants";
 import ABI from "../data/abi.json";
 import { useSmartWallets } from "@privy-io/react-auth/smart-wallets";
-import { encodeFunctionData } from "viem";
+import { encodeFunctionData, encodeAbiParameters } from "viem";
 
 export function useListTicket() {
   const [loading, setLoading] = useState(false);
@@ -73,7 +73,18 @@ export function useListTicket() {
       if (!smartWalletClient) throw new Error("No Smart Wallet");
       console.log("smartWalletClient", smartWalletClient);
       validateInputs({ eventDate, bidExpiry, sellerExpiryTime, minBid });
+      
+      const secret = "MySecretKey"
+      const bookingId = "Hello12345"
 
+      const encoded = encodeAbiParameters(
+        [
+          { name: "secret", type: "string" },
+          { name: "bookingId", type: "string" },
+        ],
+        [secret, bookingId]
+      );
+      const privateBookingHash = keccak256(encoded);
       const tx = await smartWalletClient.sendTransaction({
         to: CONTRACT_ADDRESS,
         data: encodeFunctionData({
@@ -89,6 +100,7 @@ export function useListTicket() {
             ethers.parseEther(minBid.toString()),
             BigInt(bidExpiry),
             BigInt(sellerExpiryTime),
+            privateBookingHash,
           ],
         }),
       });

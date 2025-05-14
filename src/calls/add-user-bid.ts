@@ -27,7 +27,7 @@ export function useAddUserBid() {
     bidAmount: number;
     email: string;
   }) => {
-    if (ticketId <= 0) {
+    if (ticketId < 0) {
       throw new Error("Invalid ticket ID");
     }
 
@@ -128,6 +128,7 @@ export function useAddUserBid() {
 
   const placeBid = async (ticketId: number, bidAmount: number, email: string) => {
     try {
+      console.log("placeBid called", ticketId, bidAmount, email);
       setLoading(true);
       setError(null);
 

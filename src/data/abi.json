@@ -319,6 +319,11 @@
             "internalType": "enum TicketMarketplace.TicketStatus",
             "name": "status",
             "type": "uint8"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "privateBookingHash",
+            "type": "bytes32"
           }
         ],
         "internalType": "struct TicketMarketplace.Ticket[]",
@@ -425,6 +430,11 @@
             "internalType": "enum TicketMarketplace.TicketStatus",
             "name": "status",
             "type": "uint8"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "privateBookingHash",
+            "type": "bytes32"
           }
         ],
         "internalType": "struct TicketMarketplace.Ticket[]",
@@ -679,6 +689,11 @@
         "internalType": "uint256",
         "name": "_sellerExpiryTime",
         "type": "uint256"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "_privateBookingHash",
+        "type": "bytes32"
       }
     ],
     "name": "listTicket",
@@ -947,6 +962,11 @@
         "internalType": "enum TicketMarketplace.TicketStatus",
         "name": "status",
         "type": "uint8"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "privateBookingHash",
+        "type": "bytes32"
       }
     ],
     "stateMutability": "view",

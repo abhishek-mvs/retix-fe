@@ -44,6 +44,7 @@ export type Ticket = {
   sellerExpiryTime: number;
   isHighestBidderFound: boolean;
   status: bigint; // 0: active, 1: pending, 2: completed, 3: notSold
+  privateBookingHash: string;
 };
 
 export type CreateTicketInput = {

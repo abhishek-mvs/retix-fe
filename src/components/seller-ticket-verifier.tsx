@@ -125,7 +125,7 @@ function SellerTicketVerifierQR({ onVerified, ticketId }: SellerTicketVerifierQR
             <span className="font-semibold">Winner's Email:</span> {bestBid.email}
           </p>
           <p className="text-gray-700">
-            <span className="font-semibold">Amount to Receive:</span> {formatEther(bestBid.amount)} ETH
+            <span className="font-semibold">Amount to Receive:</span> {formatEther(bestBid.amount)} USDC
           </p>
         </div>
       ) : null}

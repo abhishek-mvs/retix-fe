@@ -36,6 +36,7 @@ export default function EventPage({ id }: { id: number }) {
       toast.success("Bid placed successfully!");
       handleCloseBidPopup();
     } catch (err) {
+      console.log("error", err);
       toast.error(error || "Failed to place bid");
     }
   };
@@ -159,9 +160,9 @@ export default function EventPage({ id }: { id: number }) {
           </div>
 
           {/* Bid Button or Expired Message */}
-          {isExpired ? (
+          {(isExpired || !isAvailableForBidding) ? (
             <div className="w-full text-center py-2 text-base font-semibold text-red-600 bg-red-50 rounded-xl border border-red-200">
-              Bidding time is expired
+              {"Ticket is not available"}
             </div>
           ) : (
             <Button
