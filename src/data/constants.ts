@@ -14,5 +14,5 @@ export const TICKET_VERIFIER_PROVIDER_ID = process.env
 
 export const PRIVY_APP_ID = process.env.NEXT_PUBLIC_PRIVY_APP_ID as string;
 
-// export const RPC = "https://sepolia.base.org";
-export const RPC = "https://base-sepolia.drpc.org";
+export const RPC = "https://sepolia.base.org";
+// export const RPC = "https://base-sepolia.drpc.org";

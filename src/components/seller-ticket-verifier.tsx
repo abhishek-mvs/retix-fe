@@ -9,6 +9,7 @@ import {
 import { useBestBid } from "@/calls/get-best-bid";
 import { formatEther } from "ethers";
 import { verifySellerTicketEmail } from "@/calls/verify-seller-ticket-email";
+import { useTicketById } from "@/calls/get-ticket";
 
 interface SellerTicketVerifierQRProps {
   onVerified?: (proof: Proof) => void;
@@ -33,11 +34,12 @@ function SellerTicketVerifierQR({ onVerified, ticketId }: SellerTicketVerifierQR
     message: string;
   } | null>(null);
   const { bestBid, loading: bidLoading, error: bidError } = useBestBid(ticketId);
+  const { ticket } = useTicketById(ticketId);
 
   // Handle verification proof updates
   useEffect(() => {
-    if (verificationProof && bestBid) {
-      const isValid = verifySellerTicketEmail(verificationProof, bestBid);
+    if (verificationProof && bestBid && ticket) {
+      const isValid = verifySellerTicketEmail(verificationProof, bestBid, ticket.privateBookingHash);
       setVerificationStatus({
         isValid,
         message: isValid 
@@ -49,7 +51,7 @@ function SellerTicketVerifierQR({ onVerified, ticketId }: SellerTicketVerifierQR
         onVerified(verificationProof);
       }
     }
-  }, [verificationProof, bestBid, onVerified]);
+  }, [verificationProof, bestBid, ticket, onVerified]);
 
   const getVerificationReq = useCallback(async () => {
     try {
