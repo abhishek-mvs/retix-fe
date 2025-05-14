@@ -59,11 +59,11 @@ function MyTicketsContent() {
     }
   };
 
-  // Filter tickets using the new status system
-  console.log("tickets", tickets);
-  for (const ticket of tickets) {
-    console.log("ticket", ticket.status);
-  }
+  // // Filter tickets using the new status system
+  // console.log("tickets", tickets);
+  // for (const ticket of tickets) {
+  //   console.log("ticket", ticket.status);
+  // }
   const activeTickets = filterActiveTickets(tickets);
   const pendingTickets = filterPendingTickets(tickets);
   const pastTickets = filterPastTickets(tickets);
