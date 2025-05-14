@@ -10,7 +10,6 @@ import TicketVerfierQR from "@/components/ticket-verifier";
 import Image from "next/image.js";
 import { keccak256 } from "ethers";
 import { encodeAbiParameters } from "viem";
-import { PinataSDK } from "pinata";
 import { useRouter } from "next/navigation";
 
 interface Proof {
@@ -36,13 +35,9 @@ export default function SellPage() {
 
   const [ticketImage, setTicketImage] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [ipfsUrl, setIpfsUrl] = useState<string | null>(null);
-  const [isUploading, setIsUploading] = useState(false);
-
+  
   const uploadToIPFS = async (file: File) => {
     try {
-      setIsUploading(true);
-      
       const formData = new FormData();
       formData.append('file', file);
 
@@ -56,13 +51,10 @@ export default function SellPage() {
       }
 
       const data = await response.json();
-      setIpfsUrl(data.url);
       return data.url;
     } catch (error) {
       console.error('Error uploading to IPFS:', error);
       throw error;
-    } finally {
-      setIsUploading(false);
     }
   };
 
@@ -114,6 +106,7 @@ export default function SellPage() {
     if (ticketImage) {
       try {
         finalImageUrl = await uploadToIPFS(ticketImage);
+        console.log("finalImageUrl", finalImageUrl);
       } catch (error) {
         console.error('Failed to upload image to IPFS:', error);
         alert('Failed to upload image. Please try again.');

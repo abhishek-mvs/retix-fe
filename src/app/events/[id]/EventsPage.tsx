@@ -53,24 +53,24 @@ export default function EventPage({ id }: { id: number }) {
   const isActive = Number(ticket.status) === 0;
   const isAvailableForBidding = isActive && !isExpired;
 
-  const getStatusMessage = () => {
-    if (!isActive) {
-      switch (Number(ticket.status)) {
-        case 1:
-          return "Ticket is pending verification";
-        case 2:
-          return "Ticket has been sold";
-        case 3:
-          return "Ticket is no longer available";
-        default:
-          return "Ticket is not available";
-      }
-    }
-    if (isExpired) {
-      return "Bidding time has expired";
-    }
-    return "";
-  };
+  // const getStatusMessage = () => {
+  //   if (!isActive) {
+  //     switch (Number(ticket.status)) {
+  //       case 1:
+  //         return "Ticket is pending verification";
+  //       case 2:
+  //         return "Ticket has been sold";
+  //       case 3:
+  //         return "Ticket is no longer available";
+  //       default:
+  //         return "Ticket is not available";
+  //     }
+  //   }
+  //   if (isExpired) {
+  //     return "Bidding time has expired";
+  //   }
+  //   return "";
+  // };
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-50">

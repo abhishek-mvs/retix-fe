@@ -4,7 +4,7 @@ import Navbar from "@/components/navbar";
 import { useUserBids } from "@/calls/get-user-bids";
 import { useTickets } from "@/calls/get-tickets";
 import { Bid } from "@/types";
-import { format, differenceInSeconds, differenceInHours, differenceInDays } from "date-fns";
+import { differenceInSeconds, differenceInHours, differenceInDays } from "date-fns";
 import { useState } from "react";
 import Image from "next/image";
 import { formatUSDC } from "@/utils/formatters";
@@ -26,9 +26,7 @@ export default function MyBidsPage() {
     return tickets.find((ticket) => ticket.id === bid.ticketId);
   };
 
-  const formatDate = (timestamp: bigint) => {
-    return format(new Date(Number(timestamp) * 1000), "MMM dd, yyyy HH:mm");
-  };
+ 
 
   const getTimeRemaining = (expiryTime: bigint) => {
     const now = new Date();

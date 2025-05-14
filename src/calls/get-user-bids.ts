@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Contract, JsonRpcProvider } from "ethers";
 import ABI from "../data/abi.json";
 import { Bid } from "@/types";
@@ -11,7 +11,7 @@ export const useUserBids = () => {
   const [error, setError] = useState<string | null>(null);
   const { user } = usePrivy();
 
-  const fetchUserBids = async () => {
+  const fetchUserBids = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -30,11 +30,13 @@ export const useUserBids = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user?.smartWallet?.address]);
 
   useEffect(() => {
-    fetchUserBids();
-  }, [user?.wallet?.address]);
+    if (user?.smartWallet?.address) {
+      fetchUserBids();
+    }
+  }, [fetchUserBids, user?.smartWallet?.address]);
 
   return { bids, loading, error, refetch: fetchUserBids };
 }; 

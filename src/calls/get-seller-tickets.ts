@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Contract, JsonRpcProvider } from "ethers";
 import ABI from "../data/abi.json";
 import { Ticket } from "@/types";
@@ -11,7 +11,7 @@ export const useSellerTickets = () => {
   const [error, setError] = useState<string | null>(null);
   const { user } = usePrivy();
 
-  const fetchTickets = async () => {
+  const fetchTickets = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -30,11 +30,13 @@ export const useSellerTickets = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user?.smartWallet?.address]);
 
   useEffect(() => {
-    fetchTickets();
-  }, []);
+    if (user?.smartWallet?.address) {
+      fetchTickets();
+    }
+  }, [fetchTickets, user?.smartWallet?.address]);
 
   return { tickets, loading, error, refetch: fetchTickets };
 };

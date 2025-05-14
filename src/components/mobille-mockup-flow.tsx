@@ -40,7 +40,7 @@ export default function MobileMockupFlow({ steps }: MobileMockupFlowProps) {
 
     // Cleanup the interval on unmount
     return () => clearInterval(interval);
-  }, []);
+  }, [steps.length]);
 
   return (
     <div className="relative">
