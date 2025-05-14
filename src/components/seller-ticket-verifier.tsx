@@ -12,7 +12,7 @@ import { verifySellerTicketEmail } from "@/calls/verify-seller-ticket-email";
 import { useTicketById } from "@/calls/get-ticket";
 
 interface SellerTicketVerifierQRProps {
-  onVerified?: (proof: Proof) => void;
+  onVerified?: (proof: Proof) => Promise<void> | void;
   ticketId: number;
 }
 
@@ -38,19 +38,23 @@ function SellerTicketVerifierQR({ onVerified, ticketId }: SellerTicketVerifierQR
 
   // Handle verification proof updates
   useEffect(() => {
-    if (verificationProof && bestBid && ticket) {
-      const isValid = verifySellerTicketEmail(verificationProof, bestBid, ticket.privateBookingHash);
-      setVerificationStatus({
-        isValid,
-        message: isValid 
-          ? "Email verification successful!" 
-          : "Email verification failed: Email address does not match the winner's email"
-      });
-      
-      if (isValid && onVerified) {
-        onVerified(verificationProof);
+    const verifyTicket = async () => {
+      if (verificationProof && bestBid && ticket) {
+        const isValid = await verifySellerTicketEmail(verificationProof, bestBid, ticket.privateBookingHash);
+        setVerificationStatus({
+          isValid,
+          message: isValid 
+            ? "Email verification successful!" 
+            : "Email verification failed: Email address does not match the winner's email"
+        });
+        
+        if (isValid && onVerified) {
+          await onVerified(verificationProof);
+        }
       }
-    }
+    };
+
+    verifyTicket();
   }, [verificationProof, bestBid, ticket, onVerified]);
 
   const getVerificationReq = useCallback(async () => {
