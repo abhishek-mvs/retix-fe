@@ -9,6 +9,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { useListTicket } from "@/calls/list-ticket";
 import TicketVerfierQR from "@/components/ticket-verifier";
 import Image from "next/image.js";
+import { keccak256 } from "ethers";
+import { encodeAbiParameters } from "viem";
 
 interface Proof {
   claimData: {
@@ -25,6 +27,7 @@ export default function SellPage() {
   const [eventDetails, setEventDetails] = useState("");
   const [finalEstimate, setFinalEstimate] = useState<number | null>(null);
   const [isVerified, setIsVerified] = useState(false);
+  const [privateBookingHash, setPrivateBookingHash] = useState("");
   const [actualEventTimestamp, setActualEventTimestamp] = useState<
     number | null
   >(null);
@@ -73,6 +76,7 @@ export default function SellPage() {
       minBid: parseInt(minBid),
       bidExpiry,
       sellerExpiryTime,
+      privateBookingHash,
     });
   };
 
@@ -86,6 +90,20 @@ export default function SellPage() {
       setEventDate(params.transactionDate || "");
       setEventLocation(params.venue_code || "");
 
+      const secret = process.env.NEXT_PUBLIC_SECRET || "";
+      const bookingId = params.URL_PARAMS_1;
+      const transactionId = params.URL_PARAMS_2;
+
+      const encoded = encodeAbiParameters(
+        [
+          { name: "secret", type: "string" },
+          { name: "bookingId", type: "string" },
+          { name: "transactionId", type: "string" },
+        ],
+        [secret, bookingId, transactionId]
+      );
+      const privateBookingHash = keccak256(encoded);
+      setPrivateBookingHash(privateBookingHash);
       // Parse IST date string to epoch
       if (params.transactionDate) {
         // Format: MM/DD/YYYY HH:MM:SS
