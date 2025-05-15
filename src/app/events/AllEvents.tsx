@@ -1,7 +1,7 @@
 "use client";
-import { useState } from "react";
-import Navbar from "@/components/navbar";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import Navbar from "@/components/navbar";
 import TicketCard from "@/components/ticket-card";
 import { useTickets } from "@/calls/get-tickets";
 import {
@@ -10,14 +10,51 @@ import {
 } from "@/utils/ticket-filters";
 
 export default function EventsPage() {
+  const [isMounted, setIsMounted] = useState(false);
   const { tickets, loading, error } = useTickets();
   const [activeTab, setActiveTab] = useState<"current" | "past">("current");
 
-  const isBrowser = typeof window !== "undefined";
-  if (!isBrowser) return <></>;
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>Error: {error}</p>;
+  if (!isMounted) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
+          <p className="text-lg text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
+          <p className="text-lg text-gray-600">Loading tickets...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center p-6 bg-red-50 rounded-lg max-w-md">
+          <p className="text-red-600 font-medium text-lg">Error: {error}</p>
+          <Button
+            onClick={() => window.location.reload()}
+            className="mt-4 bg-red-600 hover:bg-red-700 text-white"
+          >
+            Try Again
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   const currentTickets = filterActiveTickets(tickets);
   const pastTickets = filterPastAndPendingTickets(tickets);

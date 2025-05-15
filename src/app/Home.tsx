@@ -1,14 +1,16 @@
 "use client";
-import Navbar from "@/components/navbar";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import dynamic from "next/dynamic.js";
-const MobileMockupFlow = dynamic(
-  () => import("@/components/mobille-mockup-flow"),
-  {
-    ssr: false,
-  }
-);
+import Navbar from "@/components/navbar";
+import MobileMockupFlow from "@/components/mobille-mockup-flow";
+
 export default function Home() {
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   // Define the steps for the sell flow
   const sellSteps = [
     {
@@ -44,6 +46,17 @@ export default function Home() {
       imageUrl: "/steps/5.jpeg",
     },
   ];
+
+  if (!isMounted) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
+          <p className="text-lg text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-white">

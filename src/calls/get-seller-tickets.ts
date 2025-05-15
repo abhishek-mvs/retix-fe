@@ -30,7 +30,7 @@ export const useSellerTickets = () => {
     } finally {
       setLoading(false);
     }
-  }, [user?.smartWallet?.address]);
+  }, [user]);
 
   useEffect(() => {
     if (user?.smartWallet?.address) {

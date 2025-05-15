@@ -1,10 +1,6 @@
-"use client";
-import dynamic from "next/dynamic";
+export const dynamic = "force-dynamic";
+import Home from "./Home";
 
-const DynamicComponentWithNoSSR = dynamic(() => import("./Home"), {
-  ssr: false,
-});
-
-export default function MyBids() {
-  return <DynamicComponentWithNoSSR />;
+export default function Page() {
+  return <Home />;
 }

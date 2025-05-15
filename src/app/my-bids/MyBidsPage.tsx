@@ -1,18 +1,34 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Navbar from "@/components/navbar";
 import { useUserBids } from "@/calls/get-user-bids";
 import { useTickets } from "@/calls/get-tickets";
 import { Bid } from "@/types";
 import { differenceInSeconds, differenceInHours, differenceInDays } from "date-fns";
-import { useState } from "react";
 import Image from "next/image";
 import { formatUSDC } from "@/utils/formatters";
 
 export default function MyBidsPage() {
+  const [isMounted, setIsMounted] = useState(false);
   const { bids, loading: bidsLoading, error: bidsError } = useUserBids();
   const { tickets, loading: ticketsLoading } = useTickets();
   const [activeTab, setActiveTab] = useState<"current" | "past">("current");
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
+          <p className="text-lg text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (bidsLoading || ticketsLoading) {
     return <div className="flex justify-center items-center min-h-screen">Loading...</div>;
@@ -25,8 +41,6 @@ export default function MyBidsPage() {
   const getTicketForBid = (bid: Bid) => {
     return tickets.find((ticket) => ticket.id === bid.ticketId);
   };
-
- 
 
   const getTimeRemaining = (expiryTime: bigint) => {
     const now = new Date();
