@@ -1,21 +1,34 @@
 import { NextResponse } from 'next/server';
-import puppeteer from 'puppeteer';
+import chromium from '@sparticuz/chromium';
+import puppeteer from 'puppeteer-core';
 
 async function getFinalUrl(url: string): Promise<{ url: string; content: string }> {
+  let executablePath;
+  
+  if (process.env.NODE_ENV === 'development') {
+    // For local development, use the system's Chrome
+    executablePath = process.platform === 'darwin' 
+      ? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
+      : process.platform === 'win32'
+      ? 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
+      : '/usr/bin/google-chrome';
+  } else {
+    // For production (Vercel), use the AWS Lambda Chrome
+    executablePath = await chromium.executablePath();
+  }
+
   const browser = await puppeteer.launch({
+    args: process.env.NODE_ENV === 'development' 
+      ? [
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
+          '--disable-web-security',
+          '--disable-features=IsolateOrigins,site-per-process',
+        ]
+      : chromium.args,
+    defaultViewport: { width: 1280, height: 800 },
+    executablePath,
     headless: true,
-    args: [
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
-      '--disable-web-security',
-      '--disable-features=IsolateOrigins,site-per-process',
-      '--disable-dev-shm-usage',
-      '--disable-accelerated-2d-canvas',
-      '--no-first-run',
-      '--no-zygote',
-      '--single-process',
-      '--disable-gpu'
-    ]
   });
 
   try {
@@ -53,6 +66,7 @@ async function getFinalUrl(url: string): Promise<{ url: string; content: string 
     const content = await page.content();
     return { url: page.url(), content };
   } catch (error) {
+    console.error('Puppeteer error:', error);
     throw error;
   } finally {
     await browser.close();
