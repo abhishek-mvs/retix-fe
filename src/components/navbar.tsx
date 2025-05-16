@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter, usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, LogOut, Copy } from "lucide-react";
+import { ChevronDown, LogOut, Copy, Wallet } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -79,6 +79,10 @@ export default function Navbar() {
     }
   };
 
+  const handleWithdraw = () => {
+    router.push("/withdraw");
+  };
+
   return (
     <nav className="flex justify-between items-center py-4">
       <div className="flex items-center">
@@ -144,6 +148,15 @@ export default function Navbar() {
                       </span>
                     </div>
                   </div>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    className="text-blue-600 cursor-pointer"
+                    onClick={handleWithdraw}
+                    disabled={parseFloat(usdcBalance) <= 0}
+                  >
+                    <Wallet className="h-4 w-4 mr-2" />
+                    Withdraw Funds
+                  </DropdownMenuItem>
                   <DropdownMenuSeparator />
                 </>
               )}
