@@ -108,7 +108,7 @@ export default function TicketCard({ ticket, type }: TicketCardProps) {
                   </Button>
                 )}
 
-                {type === "selling" && Number(ticket.status) === 0 && (
+                {/* {type === "selling" && Number(ticket.status) === 0 && (
                   <>
                     <Button
                       variant="outline"
@@ -123,7 +123,7 @@ export default function TicketCard({ ticket, type }: TicketCardProps) {
                       Remove Listing
                     </Button>
                   </>
-                )}
+                )} */}
 
                 {type === "selling" && Number(ticket.status) === 1 && (
                   <Button

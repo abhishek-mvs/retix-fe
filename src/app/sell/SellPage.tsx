@@ -29,6 +29,7 @@ export default function SellPage() {
   const [eventDetails, setEventDetails] = useState("");
   const [finalEstimate, setFinalEstimate] = useState<number | null>(null);
   const [isVerified, setIsVerified] = useState(false);
+  const [isExpired, setIsExpired] = useState(false);
   const [privateBookingHash, setPrivateBookingHash] = useState("");
   const [actualEventTimestamp, setActualEventTimestamp] = useState<number | null>(null);
   const [ticketImage, setTicketImage] = useState<File | null>(null);
@@ -46,7 +47,7 @@ export default function SellPage() {
 
   useEffect(() => {
     function calculateFinalPrice(): number {
-      const serviceFee = 2;
+      const serviceFee = 0;
       const finalPrice = parseInt(minBid) - serviceFee;
       return finalPrice > 0 ? finalPrice : 0; // Prevent negative values
     }
@@ -112,7 +113,7 @@ export default function SellPage() {
 
     // Subtract time from actual event for expiry values
     const bidExpiry = actualEventTimestamp - 2 * 60;
-    const sellerExpiryTime = actualEventTimestamp + 45 * 60;
+    const sellerExpiryTime = actualEventTimestamp - 1 * 60;
 
     let finalImageUrl = "https://assets-in.bmscdn.com/iedb/movies/images/mobile/listing/medium/raid-2-et00382745-1742820522.jpg";
     
@@ -127,7 +128,10 @@ export default function SellPage() {
         return;
       }
     }
-
+    console.log("actualEventTimestamp", actualEventTimestamp)
+    console.log("bidExpiry", bidExpiry)
+    console.log("sellerExpiryTime", sellerExpiryTime)
+    
     try {
       await listTicket({
         eventDetails,
@@ -152,6 +156,7 @@ export default function SellPage() {
 
   const handleProofVerified = (proof: Proof) => {
     setIsVerified(true);
+    setIsExpired(false);
     try {
       const context = JSON.parse(proof.claimData.context);
       const params = context.extractedParameters || {};
@@ -189,15 +194,37 @@ export default function SellPage() {
         date.setHours(date.getHours() - 5);
         date.setMinutes(date.getMinutes() - 30);
 
-        const timestamp10MinsFromNow = Math.floor(
-          (Date.now() + 60 * 60 * 1000) / 1000
-        );
-        setActualEventTimestamp(timestamp10MinsFromNow);
-        console.log("actualEventTimestamp", timestamp10MinsFromNow);
+        // Convert the date to Unix timestamp (seconds since epoch)
+        const eventTimestamp = Math.floor(date.getTime() / 1000);
+        
+        // Check if event is in the past (more than 2 hours ago)
+        const currentTime = Math.floor(Date.now() / 1000);
+        if (eventTimestamp < currentTime - 7200) { // 7200 seconds = 2 hours
+          setIsExpired(true);
+          return;
+        }
+        
+        setActualEventTimestamp(eventTimestamp);
+        console.log("actualEventTimestamp", eventTimestamp);
       }
     } catch (error) {
       console.error("Error parsing proof data:", error);
     }
+  };
+
+  const handleTryAnotherTicket = () => {
+    setIsVerified(false);
+    setIsExpired(false);
+    setEventName("");
+    setEventDate("");
+    setEventLocation("");
+    setEventDetails("");
+    setMinBid("");
+    setFinalEstimate(null);
+    setPrivateBookingHash("");
+    setActualEventTimestamp(null);
+    setTicketImage(null);
+    setPreviewUrl(null);
   };
 
   return (
@@ -210,6 +237,19 @@ export default function SellPage() {
 
           {!isVerified ? (
             <TicketVerfierQR onVerified={handleProofVerified} />
+          ) : isExpired ? (
+            <div className="text-center py-8">
+              <div className="bg-red-50 border border-red-200 rounded-lg p-6 mb-4">
+                <h2 className="text-xl font-semibold text-red-700 mb-2">Ticket Expired</h2>
+                <p className="text-gray-600 mb-4">This ticket is for an event that has already passed or is too close to the event time. You cannot list expired tickets.</p>
+                <Button 
+                  onClick={handleTryAnotherTicket}
+                  className="bg-black hover:bg-gray-800 text-white"
+                >
+                  Try Another Ticket
+                </Button>
+              </div>
+            </div>
           ) : (
             <>
               <div className="grid md:grid-cols-12 gap-8">
@@ -408,7 +448,7 @@ export default function SellPage() {
                     </h2>
 
                     <div className="space-y-4">
-                      <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                      {/* <div className="flex justify-between items-center py-2 border-b border-gray-100">
                         <div className="flex items-center">
                           <span className="text-gray-600">Service Fee</span>
                           <button className="ml-1 text-gray-400 hover:text-gray-600">
@@ -428,12 +468,12 @@ export default function SellPage() {
                           </button>
                         </div>
                         <span className="font-medium">$2</span>
-                      </div>
+                      </div> */}
 
                       <div className="flex justify-between items-center py-2">
                         <div className="flex items-center">
                           <span className="text-gray-800 font-medium">
-                            Estimate you will receive
+                            You will receive
                           </span>
                           <button className="ml-1 text-gray-400 hover:text-gray-600">
                             <svg
