@@ -2,7 +2,7 @@
 import type React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, LogOut, Copy } from "lucide-react";
 import {
@@ -176,8 +176,16 @@ function NavLink({
   href: string;
   children: React.ReactNode;
 }) {
+  const pathname = usePathname();
+  const isActive = pathname === href;
+
   return (
-    <Link href={href} className="text-gray-800 hover:text-green-600">
+    <Link 
+      href={href} 
+      className={`text-gray-800 hover:text-green-600 transition-colors ${
+        isActive ? "text-green-600 font-medium" : ""
+      }`}
+    >
       {children}
     </Link>
   );
