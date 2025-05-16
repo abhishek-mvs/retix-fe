@@ -57,6 +57,7 @@ export async function verifySellerTicketEmail(
         if (shortUrlMatch) {
           const shortUrl = shortUrlMatch[0];
           const resolvedData = await resolveShortUrl(shortUrl);
+          console.log('Resolved data:', resolvedData);
           if (resolvedData) {
             bookingId = resolvedData.bookingId;
             transactionId = resolvedData.transactionId;
