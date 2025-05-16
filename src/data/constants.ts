@@ -4,7 +4,7 @@
 // export const MOCK_USDC_ADDRESS = "0x2fd2a828992ac642a536bee59ac66d6cd156efd3";
 
 // Mainnet
-export const CONTRACT_ADDRESS = "0xe98574a6744b11006624715f39cd65548e675225";
+export const CONTRACT_ADDRESS = "0xb4f6c6a0b78b444966bf0f59026171cf98be47ec";
 export const MOCK_USDC_ADDRESS = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
 
 export const RECLAIM_APP_ID = process.env.NEXT_PUBLIC_RECLAIM_APP_ID as string;
