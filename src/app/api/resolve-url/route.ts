@@ -87,6 +87,9 @@ export async function GET(request: Request) {
     const bookingId = urlParams.get('bookingID');
     const transactionId = urlParams.get('transactionID');
 
+    console.log('Extracted bookingId:', bookingId);
+    console.log('Extracted transactionId:', transactionId);
+
     return NextResponse.json({ 
       bookingId,
       transactionId
