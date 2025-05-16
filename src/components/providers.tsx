@@ -2,7 +2,7 @@
 
 import { PRIVY_APP_ID } from "@/data/constants";
 import { PrivyProvider } from "@privy-io/react-auth";
-import { baseSepolia } from "wagmi/chains";
+import { baseSepolia, base } from "wagmi/chains";
 import { SmartWalletsProvider } from "@privy-io/react-auth/smart-wallets";
 
 export function Providers({ children }: { children: React.ReactNode }) {
@@ -24,8 +24,8 @@ export function Providers({ children }: { children: React.ReactNode }) {
           // createOnLogin: "all-users",
         },
 
-        defaultChain: baseSepolia,
-        supportedChains: [baseSepolia],
+        defaultChain: base,
+        supportedChains: [baseSepolia, base],
       }}
     >
       <SmartWalletsProvider>{children}</SmartWalletsProvider>

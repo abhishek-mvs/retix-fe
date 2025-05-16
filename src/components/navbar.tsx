@@ -16,10 +16,11 @@ import { usePrivy } from "@privy-io/react-auth";
 import { toast } from "sonner";
 import { useEffect, useState } from "react";
 import { createPublicClient, http } from "viem";
-import { baseSepolia } from "wagmi/chains";
+import { base } from "wagmi/chains";
 import { MOCK_USDC_ADDRESS } from "@/data/constants";
 import USDC_ABI from "../data/usdcERC20.json";
 import { ethers } from "ethers";
+import { formatUSDC } from "@/utils/formatters";
 
 export default function Navbar() {
   const router = useRouter();
@@ -34,7 +35,7 @@ export default function Navbar() {
 
       try {
         const publicClient = createPublicClient({
-          chain: baseSepolia,
+          chain: base,
           transport: http(),
         });
 
@@ -51,7 +52,7 @@ export default function Navbar() {
           functionName: "balanceOf",
           args: [user.smartWallet.address],
         })) as bigint;
-        setUsdcBalance(ethers.formatEther(usdcBalanceWei));
+        setUsdcBalance(formatUSDC(usdcBalanceWei).toString());
       } catch (error) {
         console.error("Error fetching balances:", error);
       } finally {

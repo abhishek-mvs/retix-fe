@@ -39,6 +39,9 @@ export const getIPFSUrl = (ipfsUrl: string) => {
 };
 
 export function formatUSDC(amount: bigint): number {
-  // Convert from 6 decimals to USDC
-  return Number(ethers.formatEther(amount));
+  return Number(ethers.formatUnits(amount, 6));
+}
+
+export function parseUSDC(amount: string): bigint {
+  return ethers.parseUnits(amount, 6);
 }

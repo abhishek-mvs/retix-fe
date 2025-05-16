@@ -7,7 +7,7 @@ import {
   RECLAIM_APP_SECRET,
 } from "@/data/constants";
 import { useBestBid } from "@/calls/get-best-bid";
-import { formatEther } from "ethers";
+import { formatUSDC } from "@/utils/formatters";
 import { verifySellerTicketEmail } from "@/calls/verify-seller-ticket-email";
 import { useTicketById } from "@/calls/get-ticket";
 
@@ -133,11 +133,11 @@ function SellerTicketVerifierQR({
       ) : bestBid ? (
         <div className="mb-6 p-4 bg-white rounded-lg shadow-sm w-full">
           <p className="text-gray-700 mb-2">
-            <span className="font-semibold">Winner&apos;s Email:</span>{" "}
+            <span className="font-semibold">Buyer&apos;s Email:</span>{" "}
             {bestBid.email}
           </p>
           <p className="text-gray-700">
-            <span className="font-semibold">Amount to Receive:</span> {formatEther(bestBid.amount)} USDC
+            <span className="font-semibold">Amount to Receive:</span> {formatUSDC(bestBid.amount)} USDC
           </p>
         </div>
       ) : null}

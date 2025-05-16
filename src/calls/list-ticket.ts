@@ -1,10 +1,9 @@
 import { useState } from "react";
-import { ethers } from "ethers";
 import { CONTRACT_ADDRESS } from "@/data/constants";
 import ABI from "../data/abi.json";
 import { useSmartWallets } from "@privy-io/react-auth/smart-wallets";
 import { encodeFunctionData } from "viem";
-
+import { parseUSDC } from "@/utils/formatters";
 export function useListTicket() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -89,7 +88,7 @@ export function useListTicket() {
             eventLocation,
             ticketImage,
             BigInt(sellerFID),
-            ethers.parseEther(minBid.toString()),
+            parseUSDC(minBid.toString()),
             BigInt(bidExpiry),
             BigInt(sellerExpiryTime),
             privateBookingHash,

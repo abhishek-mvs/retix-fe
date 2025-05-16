@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { usePrivy } from "@privy-io/react-auth";
 import { useSmartWallets } from "@privy-io/react-auth/smart-wallets";
 import { createPublicClient, http, encodeFunctionData } from "viem";
-import { baseSepolia } from "wagmi/chains";
+import { base } from "wagmi/chains";
 import { MOCK_USDC_ADDRESS } from "@/data/constants";
 import USDC_ABI from "@/data/usdcERC20.json";
 import { ethers } from "ethers";
@@ -21,7 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
+import { parseUSDC, formatUSDC } from "@/utils/formatters";
 type TokenType = "ETH" | "USDC";
 
 export default function WithdrawPage() {
@@ -47,7 +47,7 @@ export default function WithdrawPage() {
 
       try {
         const publicClient = createPublicClient({
-          chain: baseSepolia,
+          chain: base,
           transport: http(),
         });
 
@@ -64,7 +64,7 @@ export default function WithdrawPage() {
           functionName: "balanceOf",
           args: [user.smartWallet.address],
         })) as bigint;
-        setUsdcBalance(ethers.formatEther(usdcBalanceWei));
+        setUsdcBalance(formatUSDC(usdcBalanceWei).toString());
       } catch (error) {
         console.error("Error fetching balances:", error);
       } finally {
@@ -95,7 +95,7 @@ export default function WithdrawPage() {
     try {
       setIsWithdrawing(true);
       const publicClient = createPublicClient({
-        chain: baseSepolia,
+        chain: base,
         transport: http(),
       });
 
@@ -115,7 +115,7 @@ export default function WithdrawPage() {
 
         // If no amount specified, withdraw all
         const amountToWithdraw = withdrawAmount 
-          ? ethers.parseEther(withdrawAmount)
+          ? parseUSDC(withdrawAmount)
           : usdcBalanceWei;
 
         if (amountToWithdraw > usdcBalanceWei) {
@@ -148,7 +148,7 @@ export default function WithdrawPage() {
             functionName: "balanceOf",
             args: [user.smartWallet.address],
           })) as bigint;
-          setUsdcBalance(ethers.formatEther(newUsdcBalanceWei));
+          setUsdcBalance(formatUSDC(newUsdcBalanceWei).toString());
         } else {
           throw new Error("Transaction failed");
         }

@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { ethers } from "ethers";
 import { CONTRACT_ADDRESS, MOCK_USDC_ADDRESS } from "@/data/constants";
 import ABI from "../data/abi.json";
 import USDC_ABI from "../data/usdcERC20.json";
@@ -7,9 +6,9 @@ import { useSmartWallets } from "@privy-io/react-auth/smart-wallets";
 import { encodeFunctionData } from "viem";
 import { usePrivy } from "@privy-io/react-auth";
 import { createPublicClient, http } from "viem";
-import { baseSepolia } from "wagmi/chains";
+import { base } from "wagmi/chains";
 import { toast } from "sonner";
-
+import { parseUSDC, formatUSDC } from "@/utils/formatters";
 export function useAddUserBid() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -44,7 +43,7 @@ export function useAddUserBid() {
     if (!user?.smartWallet?.address) throw new Error("No wallet address found");
 
     const publicClient = createPublicClient({
-      chain: baseSepolia,
+      chain: base,
       transport: http()
     });
 
@@ -55,11 +54,11 @@ export function useAddUserBid() {
       args: [user.smartWallet.address]
     }) as bigint;
 
-    console.log("USDC Balance:", ethers.formatEther(balance));
-    console.log("Required Amount:", ethers.formatEther(requiredAmount));
+    console.log("USDC Balance:", formatUSDC(balance));
+    console.log("Required Amount:", formatUSDC(requiredAmount));
 
     if (balance < requiredAmount) {
-      throw new Error(`Insufficient USDC balance. You need ${ethers.formatEther(requiredAmount)} USDC but have ${ethers.formatEther(balance)} USDC.`);
+      throw new Error(`Insufficient USDC balance. You need ${formatUSDC(requiredAmount)} USDC but have ${formatUSDC(balance)} USDC.`);
     }
 
     return balance;
@@ -69,14 +68,14 @@ export function useAddUserBid() {
     if (!smartWalletClient) throw new Error("No Smart Wallet");
     if (!user?.smartWallet?.address) throw new Error("No wallet address found");
 
-    const bidAmountWei = ethers.parseEther(bidAmount.toString());
+    const bidAmountWei = parseUSDC(bidAmount.toString());
     
     // Check USDC balance first
     await checkUSDCBalance(bidAmountWei);
     
     // Create a public client for read operations
     const publicClient = createPublicClient({
-      chain: baseSepolia,
+      chain: base,
       transport: http()
     });
 
@@ -137,7 +136,7 @@ export function useAddUserBid() {
       // Validate inputs before proceeding
       validateInputs({ ticketId, bidAmount, email });
 
-      const bidAmountWei = ethers.parseEther(bidAmount.toString());
+      const bidAmountWei = parseUSDC(bidAmount.toString());
       console.log("ticketId", ticketId);
       console.log("bidAmount", bidAmount.toString());
       console.log("email", email);
@@ -155,7 +154,7 @@ export function useAddUserBid() {
 
       // Create a public client for simulation
       const publicClient = createPublicClient({
-        chain: baseSepolia,
+        chain: base,
         transport: http()
       });
 
