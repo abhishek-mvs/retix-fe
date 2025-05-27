@@ -8,31 +8,22 @@ import { usePathname, useSearchParams } from "next/navigation"
 
 export function PostHogProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
-    // Only initialize PostHog in production
-    if (process.env.NODE_ENV === "production") {
-      posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY!, {
-        api_host: "/ingest",
-        ui_host: "https://us.posthog.com",
-        capture_pageview: false, // We capture pageviews manually
-        capture_pageleave: true, // Enable pageleave capture
-        capture_exceptions: true, // Enable exception tracking
-        debug: false, // Disable debug mode in production
-      })
-    }
+    posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY!, {
+      api_host: "/ingest",
+      ui_host: "https://us.posthog.com",
+      capture_pageview: false, // We capture pageviews manually
+      capture_pageleave: true, // Enable pageleave capture
+      capture_exceptions: true, // Enable exception tracking
+      debug: process.env.NODE_ENV === "development",
+    })
   }, [])
 
-  // Only wrap with PostHog provider in production
-  if (process.env.NODE_ENV === "production") {
-    return (
-      <PHProvider client={posthog}>
-        <SuspendedPostHogPageView />
-        {children}
-      </PHProvider>
-    )
-  }
-
-  // In non-production environments, just render children
-  return <>{children}</>
+  return (
+    <PHProvider client={posthog}>
+      <SuspendedPostHogPageView />
+      {children}
+    </PHProvider>
+  )
 }
 
 function PostHogPageView() {

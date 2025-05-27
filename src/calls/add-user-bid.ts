@@ -6,7 +6,7 @@ import { useSmartWallets } from "@privy-io/react-auth/smart-wallets";
 import { encodeFunctionData } from "viem";
 import { usePrivy } from "@privy-io/react-auth";
 import { createPublicClient, http } from "viem";
-import { baseSepolia } from "wagmi/chains";
+import { base } from "wagmi/chains";
 import { toast } from "sonner";
 import { parseUSDC, formatUSDC } from "@/utils/formatters";
 export function useAddUserBid() {
@@ -43,7 +43,7 @@ export function useAddUserBid() {
     if (!user?.smartWallet?.address) throw new Error("No wallet address found");
 
     const publicClient = createPublicClient({
-      chain: baseSepolia,
+      chain: base,
       transport: http()
     });
 
@@ -75,7 +75,7 @@ export function useAddUserBid() {
     
     // Create a public client for read operations
     const publicClient = createPublicClient({
-      chain: baseSepolia,
+      chain: base,
       transport: http()
     });
 
@@ -154,7 +154,7 @@ export function useAddUserBid() {
 
       // Create a public client for simulation
       const publicClient = createPublicClient({
-        chain: baseSepolia,
+        chain: base,
         transport: http()
       });
 
