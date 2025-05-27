@@ -38,6 +38,7 @@ async function getFinalUrl(url: string): Promise<{ url: string; content: string 
     await page.setRequestInterception(true);
     page.on('request', (request) => request.continue());
 
+    // First navigation
     const response = await page.goto(url, { 
       waitUntil: ['domcontentloaded', 'networkidle2'],
       timeout: 60000 
@@ -48,9 +49,10 @@ async function getFinalUrl(url: string): Promise<{ url: string; content: string 
     }
     
     await new Promise(resolve => setTimeout(resolve, 5000));
-    const finalUrl = page.url();
+    let currentUrl = page.url();
     
-    if (finalUrl.includes('bmsurl.co')) {
+    // Handle bmsurl.co redirects
+    if (currentUrl.includes('bmsurl.co')) {
       const content = await page.content();
       const redirectMatch = content.match(/window\.location\.href\s*=\s*['"]([^'"]+)['"]/);
       
@@ -58,11 +60,30 @@ async function getFinalUrl(url: string): Promise<{ url: string; content: string 
         const redirectUrl = redirectMatch[1];
         await page.goto(redirectUrl, { waitUntil: ['domcontentloaded', 'networkidle2'] });
         await new Promise(resolve => setTimeout(resolve, 2000));
+        currentUrl = page.url();
+      }
+    }
+    
+    // Handle tiny URL redirects
+    if (currentUrl.includes('/tiny/')) {
+      console.log('Detected tiny URL, following redirect chain...');
+      let redirectCount = 0;
+      const maxRedirects = 5; // Prevent infinite redirects
+      
+      while (currentUrl.includes('/tiny/') && redirectCount < maxRedirects) {
+        await page.goto(currentUrl, { 
+          waitUntil: ['domcontentloaded', 'networkidle2'],
+          timeout: 60000 
+        });
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        currentUrl = page.url();
+        redirectCount++;
+        console.log(`Redirect ${redirectCount}: ${currentUrl}`);
       }
     }
     
     const content = await page.content();
-    return { url: page.url(), content };
+    return { url: currentUrl, content };
   } catch (error) {
     console.error('Error resolving URL:', {
       error: error instanceof Error ? error.message : 'Unknown error',
