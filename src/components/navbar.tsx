@@ -16,7 +16,7 @@ import { usePrivy } from "@privy-io/react-auth";
 import { toast } from "sonner";
 import { useEffect, useState } from "react";
 import { createPublicClient, http } from "viem";
-import { baseSepolia } from "wagmi/chains";
+import { base } from "wagmi/chains";
 import { MOCK_USDC_ADDRESS } from "@/data/constants";
 import USDC_ABI from "../data/usdcERC20.json";
 import { ethers } from "ethers";
@@ -35,7 +35,7 @@ export default function Navbar() {
 
       try {
         const publicClient = createPublicClient({
-          chain: baseSepolia,
+          chain: base,
           transport: http(),
         });
 

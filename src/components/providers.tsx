@@ -26,7 +26,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
             // createOnLogin: "all-users",
           },
 
-          defaultChain: baseSepolia,
+          defaultChain: base,
           supportedChains: [baseSepolia, base],
         }}
       >
