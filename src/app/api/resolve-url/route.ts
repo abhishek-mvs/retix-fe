@@ -69,12 +69,57 @@ async function getFinalUrl(url: string): Promise<{ url: string; content: string 
       console.log('Detected tiny URL, following redirect chain...');
       let redirectCount = 0;
       const maxRedirects = 5; // Prevent infinite redirects
+      let previousUrl = '';
       
       while (currentUrl.includes('/tiny/') && redirectCount < maxRedirects) {
-        await page.goto(currentUrl, { 
-          waitUntil: ['domcontentloaded', 'networkidle2'],
-          timeout: 60000 
-        });
+        // Break if we're stuck in a loop
+        if (currentUrl === previousUrl) {
+          console.log('Detected redirect loop, breaking...');
+          break;
+        }
+        
+        previousUrl = currentUrl;
+        
+        // For BookMyShow tiny URLs, we need to handle them differently
+        if (currentUrl.includes('bookmyshow.com/tiny/')) {
+          try {
+            // First try to get the page content
+            const content = await page.content();
+            
+            // Look for meta refresh or JavaScript redirects
+            const metaRefreshMatch = content.match(/<meta[^>]*?refresh[^>]*?content="[^"]*?url=([^"]*?)"/i);
+            const jsRedirectMatch = content.match(/window\.location\.href\s*=\s*['"]([^'"]+)['"]/);
+            
+            if (metaRefreshMatch) {
+              currentUrl = metaRefreshMatch[1];
+            } else if (jsRedirectMatch) {
+              currentUrl = jsRedirectMatch[1];
+            } else {
+              // If no redirect found in content, try to follow any redirects
+              const response = await page.goto(currentUrl, { 
+                waitUntil: ['domcontentloaded', 'networkidle2'],
+                timeout: 60000 
+              });
+              
+              if (response) {
+                const headers = response.headers();
+                if (headers.location) {
+                  currentUrl = headers.location;
+                }
+              }
+            }
+          } catch (error) {
+            console.error('Error handling BookMyShow tiny URL:', error);
+            break;
+          }
+        } else {
+          // Handle other tiny URLs as before
+          await page.goto(currentUrl, { 
+            waitUntil: ['domcontentloaded', 'networkidle2'],
+            timeout: 60000 
+          });
+        }
+        
         await new Promise(resolve => setTimeout(resolve, 2000));
         currentUrl = page.url();
         redirectCount++;

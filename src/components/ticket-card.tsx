@@ -107,32 +107,6 @@ export default function TicketCard({ ticket, type }: TicketCardProps) {
                     Download Receipt
                   </Button>
                 )}
-
-                {/* {type === "selling" && Number(ticket.status) === 0 && (
-                  <>
-                    <Button
-                      variant="outline"
-                      className="flex items-center justify-center gap-2"
-                    >
-                      Edit Listing
-                    </Button>
-                    <Button
-                      variant="destructive"
-                      className="flex items-center justify-center gap-2"
-                    >
-                      Remove Listing
-                    </Button>
-                  </>
-                )} */}
-
-                {type === "selling" && Number(ticket.status) === 1 && (
-                  <Button
-                    variant="outline"
-                    className="flex items-center justify-center gap-2"
-                  >
-                    Verify Ticket
-                  </Button>
-                )}
               </div>
             </div>
           </div>
