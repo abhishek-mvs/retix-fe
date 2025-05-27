@@ -1,36 +1,81 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Ticket Marketplace Frontend
+
+This is the frontend application for the Ticket Marketplace, built with Next.js 15 and React 19. The application uses modern web3 technologies and provides a seamless user experience for ticket trading.
+
+## Tech Stack
+
+- **Framework**: Next.js 15.3.1
+- **UI Library**: React 19
+- **Authentication**: Privy
+- **Web3 Integration**: 
+  - ethers.js
+  - wagmi
+  - viem
+  - permissionless
+- **UI Components**: 
+  - Radix UI
+  - Tailwind CSS
+  - Lucide React
+- **Analytics**: PostHog
+- **Storage**: Pinata (IPFS)
+
+## Prerequisites
+
+- Node.js (Latest LTS version recommended)
+- Yarn or npm package manager
+- Git
 
 ## Getting Started
 
-First, run the development server:
-
+1. Clone the repository:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone [repository-url]
+cd ticket-marketplace-base2.0/retix-fe
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Install dependencies:
+```bash
+yarn install
+# or
+npm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. Set up environment variables:
+Create a `.env` file in the root directory and add the necessary environment variables (refer to `.env.example` if available).
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+4. Run the development server:
+```bash
+yarn dev
+# or
+npm run dev
+```
 
-## Learn More
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the application.
 
-To learn more about Next.js, take a look at the following resources:
+## Available Scripts
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- `yarn dev` - Start the development server
+- `yarn build` - Build the application for production
+- `yarn start` - Start the production server
+- `yarn lint` - Run ESLint to check code quality
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Project Structure
 
-## Deploy on Vercel
+- `/src` - Source code directory
+- `/public` - Static assets
+- `/components` - Reusable React components
+- `/app` - Next.js app directory (pages and layouts)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Contributing
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. Create a new branch for your feature
+2. Make your changes
+3. Submit a pull request
+
+## License
+
+[Add license information here]
+
+## Support
+
+For support, please [add support contact information]
