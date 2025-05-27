@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { usePrivy } from "@privy-io/react-auth";
 import { useSmartWallets } from "@privy-io/react-auth/smart-wallets";
 import { createPublicClient, http, encodeFunctionData } from "viem";
-import { base } from "wagmi/chains";
+import { baseSepolia } from "wagmi/chains";
 import { MOCK_USDC_ADDRESS } from "@/data/constants";
 import USDC_ABI from "@/data/usdcERC20.json";
 import { ethers } from "ethers";
@@ -47,7 +47,7 @@ export default function WithdrawPage() {
 
       try {
         const publicClient = createPublicClient({
-          chain: base,
+          chain: baseSepolia,
           transport: http(),
         });
 
@@ -95,7 +95,7 @@ export default function WithdrawPage() {
     try {
       setIsWithdrawing(true);
       const publicClient = createPublicClient({
-        chain: base,
+        chain: baseSepolia,
         transport: http(),
       });
 
