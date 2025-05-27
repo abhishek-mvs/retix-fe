@@ -6,14 +6,12 @@ async function getFinalUrl(url: string): Promise<{ url: string; content: string 
   let executablePath;
   
   if (process.env.NODE_ENV === 'development') {
-    // For local development, use the system's Chrome
     executablePath = process.platform === 'darwin' 
       ? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
       : process.platform === 'win32'
       ? 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
       : '/usr/bin/google-chrome';
   } else {
-    // For production (Vercel), use the AWS Lambda Chrome
     executablePath = await chromium.executablePath();
   }
 
@@ -66,7 +64,10 @@ async function getFinalUrl(url: string): Promise<{ url: string; content: string 
     const content = await page.content();
     return { url: page.url(), content };
   } catch (error) {
-    console.error('Puppeteer error:', error);
+    console.error('Error resolving URL:', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      url
+    });
     throw error;
   } finally {
     await browser.close();
@@ -87,14 +88,30 @@ export async function GET(request: Request) {
     const bookingId = urlParams.get('bookingID');
     const transactionId = urlParams.get('transactionID');
 
-    console.log('Extracted bookingId:', bookingId);
-    console.log('Extracted transactionId:', transactionId);
+    console.log('URL Resolution Result:', {
+      originalUrl: url,
+      finalUrl,
+      bookingId,
+      transactionId
+    });
+
+    if (!bookingId || !transactionId) {
+      return NextResponse.json({ 
+        error: 'Required parameters not found in URL',
+        finalUrl
+      }, { status: 400 });
+    }
 
     return NextResponse.json({ 
       bookingId,
       transactionId
     });
   } catch (error) {
+    console.error('Failed to resolve URL:', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      url
+    });
+    
     return NextResponse.json({ 
       error: 'Failed to resolve URL',
       details: error instanceof Error ? error.message : 'Unknown error'

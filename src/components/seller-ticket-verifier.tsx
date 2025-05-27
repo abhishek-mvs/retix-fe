@@ -31,6 +31,7 @@ function SellerTicketVerifierQR({
 }: SellerTicketVerifierQRProps) {
   const [requestUrl, setRequestUrl] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [isVerifying, setIsVerifying] = useState(false);
   const [verificationProof, setVerificationProof] = useState<Proof | null>(
     null
   );
@@ -45,16 +46,27 @@ function SellerTicketVerifierQR({
   useEffect(() => {
     const verifyTicket = async () => {
       if (verificationProof && bestBid && ticket) {
-        const isValid = await verifySellerTicketEmail(verificationProof, bestBid, ticket.privateBookingHash);
-        setVerificationStatus({
-          isValid,
-          message: isValid 
-            ? "Email verification successful!" 
-            : "Email verification failed: Email address does not match the winner's email"
-        });
-        
-        if (isValid && onVerified) {
-          await onVerified(verificationProof);
+        setIsVerifying(true);
+        try {
+          const isValid = await verifySellerTicketEmail(verificationProof, bestBid, ticket.privateBookingHash);
+          setVerificationStatus({
+            isValid,
+            message: isValid 
+              ? "Email verification successful!" 
+              : "Email verification failed: Email address does not match the winner's email"
+          });
+          
+          if (isValid && onVerified) {
+            await onVerified(verificationProof);
+          }
+        } catch (error) {
+          console.error("Error verifying ticket:", error);
+          setVerificationStatus({
+            isValid: false,
+            message: "Error verifying ticket. Please try again."
+          });
+        } finally {
+          setIsVerifying(false);
         }
       }
     };
@@ -142,7 +154,13 @@ function SellerTicketVerifierQR({
         </div>
       ) : null}
 
-      {verificationStatus && (
+      {isVerifying ? (
+        <div className="flex flex-col items-center justify-center p-6">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mb-4"></div>
+          <p className="text-lg text-gray-600">Verifying ticket proof...</p>
+          <p className="text-sm text-gray-500 mt-2">Please wait while we verify your ticket</p>
+        </div>
+      ) : verificationStatus ? (
         <div
           className={`mt-4 p-4 rounded-lg ${
             verificationStatus.isValid
@@ -160,9 +178,7 @@ function SellerTicketVerifierQR({
             </button>
           )}
         </div>
-      )}
-
-      {!verificationStatus && (
+      ) : (
         <>
           <p className="text-gray-600 mb-6">
             Scan this QR code with your phone to verify your ticket details
